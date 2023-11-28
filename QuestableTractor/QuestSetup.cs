@@ -52,7 +52,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
             this.Helper.Events.Content.AssetRequested += this.OnAssetRequested;
             this.Helper.Events.GameLoop.OneSecondUpdateTicked += this.GameLoop_OneSecondUpdateTicked;
-            this.Helper.Events.GameLoop.GameLaunched += (_, _) => this.UpdateTractorModConfig();
+            this.Helper.Events.GameLoop.SaveLoaded += (_, _) => this.UpdateTractorModConfig();
             this.Helper.Events.GameLoop.DayStarted += this.OnDayStarted;
             this.Helper.Events.GameLoop.DayEnding += this.OnDayEnding;
         }
@@ -61,11 +61,11 @@ namespace NermNermNerm.Stardew.QuestableTractor
         {
             this.TractorModConfig.SetConfig(
                 isBuildingAvailable: RestoreTractorQuest.IsBuildingUnlocked,
-                isTractorRunning: RestoreTractorQuest.IsTractorUnlocked,
+                isTractorEnabled: RestoreTractorQuest.IsTractorUnlocked,
                 isHoeUnlocked: RestoreTractorQuest.IsTractorUnlocked, // <- comes stock
                 isLoaderUnlocked: this.loaderQuestController.IsComplete,
                 isHarvesterUnlocked: this.scytheQuestController.IsComplete,
-                isSpreadyUnlocked: this.seederQuestController.IsComplete,
+                isSpreaderUnlocked: this.seederQuestController.IsComplete,
                 isWatererUnlocked: this.watererQuestController.IsComplete);
         }
 
@@ -93,12 +93,15 @@ namespace NermNermNerm.Stardew.QuestableTractor
             return isIntersecting;
         }
 
+        [EventPriority(EventPriority.Low)] // Causes our OnDayStarted to come after TractorMod's, which does not set EventPriority
         public void OnDayStarted(object? sender, DayStartedEventArgs e)
         {
             if (!Context.IsMainPlayer)
             {
                 return;
             }
+
+            this.TractorModConfig.OnDayStarted();
 
             foreach (var qc in this.QuestControllers)
             {
