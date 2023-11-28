@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Buildings;
@@ -27,11 +28,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
             this.questTitle = "Investigate the tractor";
             this.questDescription = "There's a rusty old tractor in the fields; it sure would be nice if it could be restored.  Perhaps the townspeople can help.";
             this.SetState(state);
-        }
-
-        public static bool IsBuildingUnlocked
-        {
-            get => ModEntry.GetModConfig<RestorationState>(ModDataKeys.MainQuestStatus) >= RestorationState.BuildTractorGarage;
         }
 
         public static bool IsTractorUnlocked
@@ -250,6 +246,8 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 q.questComplete();
                 Game1.player.modData[ModDataKeys.MainQuestStatus] = RestorationState.Complete.ToString();
             }
+
+            mod.TractorModConfig.IsGarageBuildingAvailable = mainQuestStatus >= RestorationState.BuildTractorGarage;
         }
 
         public string Serialize() => this.state.ToString();

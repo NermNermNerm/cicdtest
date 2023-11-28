@@ -56,10 +56,9 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         private void UpdateTractorModConfig()
         {
+            this.TractorModConfig.IsTractorEnabled = RestoreTractorQuest.IsTractorUnlocked;
             this.TractorModConfig.SetConfig(
-                isBuildingAvailable: RestoreTractorQuest.IsBuildingUnlocked,
-                isTractorEnabled: RestoreTractorQuest.IsTractorUnlocked,
-                isHoeUnlocked: RestoreTractorQuest.IsTractorUnlocked, // <- comes stock
+                isHoeUnlocked: true, // <- comes stock
                 isLoaderUnlocked: this.loaderQuestController.IsComplete,
                 isHarvesterUnlocked: this.scytheQuestController.IsComplete,
                 isSpreaderUnlocked: this.seederQuestController.IsComplete,
@@ -107,7 +106,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
             BorrowHarpoonQuest.OnDayStarted(this);
             this.SetupMissingPartConversations();
             this.TractorModConfig.OnDayStarted();
-            this.TractorModConfig.IsGarageBuildingAvailable = RestoreTractorQuest.IsBuildingUnlocked;
         }
 
         private void SetupMissingPartConversations()

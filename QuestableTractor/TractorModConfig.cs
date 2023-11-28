@@ -14,7 +14,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
     internal class TractorModConfig
     {
         private readonly ModEntry mod;
-        private bool isTractorEnabled = true; // <- tractormod creates the tractor in OnDayStart
         private bool isBuildingAvailable = true; // <-- again, this is what tractor mod enables from day 1
 
         public const string GarageBuildingId = "Pathoschild.TractorMod_Stable";
@@ -37,21 +36,17 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
         }
 
-        public void SetConfig(bool isBuildingAvailable, bool isTractorEnabled, bool isHoeUnlocked, bool isLoaderUnlocked, bool isHarvesterUnlocked, bool isWatererUnlocked, bool isSpreaderUnlocked)
-        {
-            if (isBuildingAvailable != this.isBuildingAvailable)
-            {
-                this.isBuildingAvailable = isBuildingAvailable;
-                this.mod.Helper.GameContent.InvalidateCache("Data/Buildings");
-            }
+        public bool IsTractorEnabled { get; set; } = false; // This is actually only enforced at OnDayStart, it's not real-time.
 
-            this.isTractorEnabled = isTractorEnabled; // Enforced in OnDayStart
+        public void SetConfig(bool isHoeUnlocked, bool isLoaderUnlocked, bool isHarvesterUnlocked, bool isWatererUnlocked, bool isSpreaderUnlocked)
+        {
+            // TODO
         }
 
         internal void OnDayStarted()
         {
             // TractorMod creates a tractor on day start.  We remove it if it's not configured.  Otherwise, doing nothing is the right thing.
-            if (!this.isTractorEnabled)
+            if (!this.IsTractorEnabled)
             {
                 Farm farm = Game1.getFarm();
                 var tractorIds = farm.buildings.OfType<Stable>().Where(s => s.buildingType.Value == GarageBuildingId).Select(s => s.HorseId).ToHashSet();
