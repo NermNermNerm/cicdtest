@@ -56,7 +56,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         private void UpdateTractorModConfig()
         {
-            this.TractorModConfig.IsTractorEnabled = RestoreTractorQuest.IsTractorUnlocked;
             this.TractorModConfig.SetConfig(
                 isHoeUnlocked: true, // <- comes stock
                 isLoaderUnlocked: this.loaderQuestController.IsComplete,

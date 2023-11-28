@@ -152,7 +152,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
             else if (n?.Name == "Clint" && this.TryTakeItemsFromPlayer(ObjectIds.BustedLoader, 1, ObjectIds.DisguisedShoe, 1))
             {
-                this.Spout(n, "Ah, these shoes look great!  Fit good too.  But somehow I still don't quite feel like a ladykiller.  Well, time will tell!#$b#I'll get this back to you in a couple days.  Look for it in the mail.  I can at least ship it to you since you did all this running around for me.");
+                this.Spout(n, "Ah, these shoes look great!  Fit good too.  But somehow I still don't quite feel like a ladykiller.  Well, time will tell!#$b#You can pick it up in a couple days.");
                 this.State = LoaderQuestState.WaitForClint1;
             }
             else if (n?.Name == "Clint" && this.State == LoaderQuestState.PickUpLoader)

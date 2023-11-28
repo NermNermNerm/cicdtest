@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using StardewModdingAPI;
@@ -17,6 +18,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
         private bool isBuildingAvailable = true; // <-- again, this is what tractor mod enables from day 1
 
         public const string GarageBuildingId = "Pathoschild.TractorMod_Stable";
+        public const string TractorModId = "Pathoschild.TractorMod";
 
         public TractorModConfig(ModEntry mod)
         {
@@ -36,17 +38,48 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
         }
 
-        public bool IsTractorEnabled { get; set; } = false; // This is actually only enforced at OnDayStart, it's not real-time.
-
         public void SetConfig(bool isHoeUnlocked, bool isLoaderUnlocked, bool isHarvesterUnlocked, bool isWatererUnlocked, bool isSpreaderUnlocked)
         {
-            // TODO
+            this.SetupTool("Axe", isLoaderUnlocked, "CutTreeStumps,ClearTreeSeeds,ClearTreeSaplings,CutBushes,ClearDebris");
+            this.SetupTool("Fertilizer", isSpreaderUnlocked, "Enable");
+            this.SetupTool("GrassStarter", isSpreaderUnlocked, "Enable");
+            this.SetupTool("Hoe", isHoeUnlocked, "TillDirt,ClearWeeds,HarvestGinger");
+            this.SetupTool("MilkPail", false, "");
+            this.SetupTool("MeleeBlunt", false, "");
+            this.SetupTool("MeleeDagger", false, "");
+            this.SetupTool("MeleeSword", false, "");
+            this.SetupTool("PickAxe", isLoaderUnlocked, "ClearDebris,ClearDirt,ClearWeeds");
+            this.SetupTool("Scythe", isHarvesterUnlocked, "HarvestCrops,HarvestFlowers,HarvestGrass,HarvestForage,ClearDeadCrops,ClearWeeds");
+            this.SetupTool("Seeds", isSpreaderUnlocked, "Enable");
+            this.SetupTool("Shears", false, "");
+            this.SetupTool("Slingshot", false, "");
+            this.SetupTool("WateringCan", isWatererUnlocked, "Enable");
+            this.SetupTool("SeedBagMod", isSpreaderUnlocked, "Enable");
+        }
+
+        private void SetupTool(string toolName, bool isEnabled, string enabledModes)
+        {
+            var modInfo = this.mod.Helper.ModRegistry.Get(TractorModId)!;
+            object tractorModApi = modInfo.GetType().GetProperty("Mod")!.GetValue(modInfo)!;
+            // object? tractorModApi = this.mod.Helper.ModRegistry.GetApi(TractorModId)!;
+            var configProp = tractorModApi.GetType().GetField("Config", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.GetField)!;
+            object? tractorModConfig = configProp.GetValue(tractorModApi)!;
+            var stdAttachProp = tractorModConfig.GetType().GetProperty("StandardAttachments")!;
+            object? stdAttach = stdAttachProp.GetValue(tractorModConfig)!;
+            var toolProp = stdAttach.GetType().GetProperty(toolName)!;
+            object? tool = toolProp.GetValue(stdAttach)!;
+
+            var enabledModesHash = (isEnabled ? enabledModes.Split(",") : new string[0]).ToHashSet();
+            foreach (var prop in tool.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty).Where(p => p.PropertyType == typeof(bool)))
+            {
+                prop.SetValue(tool, enabledModesHash.Contains(prop.Name));
+            }
         }
 
         internal void OnDayStarted()
         {
             // TractorMod creates a tractor on day start.  We remove it if it's not configured.  Otherwise, doing nothing is the right thing.
-            if (!this.IsTractorEnabled)
+            if (!RestoreTractorQuest.IsTractorUnlocked)
             {
                 Farm farm = Game1.getFarm();
                 var tractorIds = farm.buildings.OfType<Stable>().Where(s => s.buildingType.Value == GarageBuildingId).Select(s => s.HorseId).ToHashSet();

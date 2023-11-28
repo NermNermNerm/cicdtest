@@ -13,12 +13,12 @@ namespace NermNermNerm.Stardew.QuestableTractor
         private bool vincentPartGot;
 
         public ScytheQuest()
-            : this(ScytheQuestState.NoCluesYet, false, false, false, false)
+            : this(ScytheQuestState.NoCluesYet, false, false, false, false, null!)
         {
             this.showNew.Value = true;
         }
 
-        internal ScytheQuest(ScytheQuestState questState, bool jazTradeKnown, bool vincentTradeKnown, bool jazPartGot, bool vincentPartGot)
+        internal ScytheQuest(ScytheQuestState questState, bool jazTradeKnown, bool vincentTradeKnown, bool jazPartGot, bool vincentPartGot, ScytheQuestController controller)
             : base(questState)
         {
             this.questTitle = "Fix the harvester";
@@ -27,6 +27,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             this.vincentPartGot = vincentPartGot;
             this.jazTradeKnown = jazTradeKnown;
             this.vincentTradeKnown = vincentTradeKnown;
+            this.Controller = controller;
             this.SetObjective();
         }
 

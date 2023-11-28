@@ -130,7 +130,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 SalePrice = 0,
                 DisplayName = "Great Grandpappy's Harpoon",
                 Description = "Willy's Great Grandpappy used this to hunt whales back in the day.",
-                Texture = "Mods/QuestableTractorMod/assets/QuestSprites",
+                Texture = ModEntry.SpritesPseudoPath,
                 SpriteIndex = 14,
                 MenuSpriteIndex = -1,
                 UpgradeLevel = 0,

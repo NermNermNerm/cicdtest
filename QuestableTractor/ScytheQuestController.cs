@@ -32,7 +32,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 return null;
             }
 
-            return new ScytheQuest(state, flags[0], flags[1], flags[2], flags[3]);
+            return new ScytheQuest(state, flags[0], flags[1], flags[2], flags[3], this);
         }
 
 

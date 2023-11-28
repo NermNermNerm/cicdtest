@@ -5,15 +5,15 @@ namespace NermNermNerm.Stardew.QuestableTractor
 {
     public static class MailKeys
     {
-        public const string BuildTheGarage = "QuestableTractorMod.BuildTheGarage";
-        public const string FixTheEngine = "QuestableTractorMod.FixTheEngine";
-        public const string WatererRepaired = "QuestableTractorMod.WatererRepaired";
-        public const string GeorgeSeederMail = "QuestableTractorMod.GeorgeSeederMail";
-        public const string EvelynPointsToAlex = "QuestableTractorMod.EvelynPointsToAlex";
-        public const string HaleysWorkIsDone = "QuestableTractorMod.HaleysWorkIsDone";
-        public const string AlexThankYouMail = "QuestableTractorMod.AlexThankYouMail";
-        public const string TractorDoneMail = "QuestableTractorMod.TractorDoneMail";
-        public const string LinusFoundShoes = "QuestableTractorMod.LinusFoundShoes";
+        public const string BuildTheGarage = "QuestableTractor.BuildTheGarage";
+        public const string FixTheEngine = "QuestableTractor.FixTheEngine";
+        public const string WatererRepaired = "QuestableTractor.WatererRepaired";
+        public const string GeorgeSeederMail = "QuestableTractor.GeorgeSeederMail";
+        public const string EvelynPointsToAlex = "QuestableTractor.EvelynPointsToAlex";
+        public const string HaleysWorkIsDone = "QuestableTractor.HaleysWorkIsDone";
+        public const string AlexThankYouMail = "QuestableTractor.AlexThankYouMail";
+        public const string TractorDoneMail = "QuestableTractor.TractorDoneMail";
+        public const string LinusFoundShoes = "QuestableTractor.LinusFoundShoes";
 
         public static void EditAssets(IDictionary<string, string> mailItems)
         {
