@@ -33,9 +33,9 @@ namespace NermNermNerm.Stardew.QuestableTractor
         where TStateEnum : struct, Enum
         where TQuest : BaseQuest<TStateEnum>, new()
     {
-        protected readonly QuestSetup mod;
+        protected readonly ModEntry mod;
 
-        protected BaseQuestController(QuestSetup mod)
+        protected BaseQuestController(ModEntry mod)
         {
             this.mod = mod;
         }

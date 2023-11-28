@@ -80,7 +80,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
         }
 
-        internal static void OnDayStarted(QuestSetup questSetup)
+        internal static void OnDayStarted(ModEntry questSetup)
         {
             Game1.player.modData.TryGetValue(ModDataKeys.BorrowHarpoonQuestStatus, out string statusAsString);
             if (statusAsString is null || !Enum.TryParse(statusAsString, out HarpoonQuestState state))
@@ -125,7 +125,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             var quest = Game1.player.questLog.OfType<BorrowHarpoonQuest>().FirstOrDefault();
             if (quest is null)
             {
-                QuestSetup.Instance.Monitor.Log("BorrowHarpoon quest was not open when player caught waterer", StardewModdingAPI.LogLevel.Warn);
+                ModEntry.Instance.Monitor.Log("BorrowHarpoon quest was not open when player caught waterer", StardewModdingAPI.LogLevel.Warn);
             }
             else
             {

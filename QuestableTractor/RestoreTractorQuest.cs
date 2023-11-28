@@ -31,17 +31,17 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         public static bool IsBuildingUnlocked
         {
-            get => QuestSetup.GetModConfig<RestorationState>(ModDataKeys.MainQuestStatus) >= RestorationState.BuildTractorGarage;
+            get => ModEntry.GetModConfig<RestorationState>(ModDataKeys.MainQuestStatus) >= RestorationState.BuildTractorGarage;
         }
 
         public static bool IsTractorUnlocked
         {
-            get => QuestSetup.GetModConfig<RestorationState>(ModDataKeys.MainQuestStatus) == RestorationState.Complete;
+            get => ModEntry.GetModConfig<RestorationState>(ModDataKeys.MainQuestStatus) == RestorationState.Complete;
         }
 
         public static bool IsStarted
         {
-            get => QuestSetup.GetModConfig<RestorationState>(ModDataKeys.MainQuestStatus) != RestorationState.NotStarted;
+            get => ModEntry.GetModConfig<RestorationState>(ModDataKeys.MainQuestStatus) != RestorationState.NotStarted;
         }
 
         private void SetState(RestorationState state)
@@ -206,7 +206,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             return true;
         }
 
-        public static void OnDayStarted(QuestSetup mod)
+        public static void OnDayStarted(ModEntry mod)
         {
             if (!Game1.player.modData.TryGetValue(ModDataKeys.MainQuestStatus, out string? statusAsString)
                 || !Enum.TryParse(statusAsString, true, out RestorationState mainQuestStatusAtDayStart))
@@ -218,10 +218,8 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 mainQuestStatusAtDayStart = RestorationState.NotStarted;
             }
 
-            var garage = Game1.getFarm().buildings.OfType<Stable>().FirstOrDefault(s => s.buildingType.Value == QuestSetup.GarageBuildingId);
-
+            var garage = Game1.getFarm().buildings.OfType<Stable>().FirstOrDefault(s => s.buildingType.Value == TractorModConfig.GarageBuildingId);
             var mainQuestStatus = RestoreTractorQuest.AdvanceProgress(garage, mainQuestStatusAtDayStart);
-
             if (mainQuestStatus.IsDerelictInTheFields())
             {
                 DerelictTractorTerrainFeature.PlaceInField(mod);

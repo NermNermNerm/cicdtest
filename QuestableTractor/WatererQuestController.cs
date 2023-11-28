@@ -14,7 +14,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         public const string HarpoonToolId = "NermNermNerm.QuestableTractor.Harpoon";
 
-        public WatererQuestController(QuestSetup mod)
+        public WatererQuestController(ModEntry mod)
             : base(mod)
         {
         }

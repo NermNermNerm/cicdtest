@@ -5,7 +5,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
     internal class SeederQuestController
         : BaseQuestController<SeederQuestState, SeederQuest>
     {
-        public SeederQuestController(QuestSetup mod) : base(mod) { }
+        public SeederQuestController(ModEntry mod) : base(mod) { }
 
         protected override string QuestCompleteMessage => "Awesome!  You've now got a way to plant and fertilize crops with your tractor!#$b#HINT: To use it, equip seeds or fertilizers while on the tractor.";
 

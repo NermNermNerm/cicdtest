@@ -193,7 +193,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             var mines = Game1.locations.FirstOrDefault(l => l.Name == "Mine");
             if (mines is null)
             {
-                QuestSetup.Instance.Monitor.Log("Couldn't find the Mine?!", StardewModdingAPI.LogLevel.Warn);
+                ModEntry.Instance.Monitor.Log("Couldn't find the Mine?!", StardewModdingAPI.LogLevel.Warn);
                 return;
             }
 
@@ -203,7 +203,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 var o = ItemRegistry.Create<StardewValley.Object>(ObjectIds.AlexesOldShoe);
                 o.Location = mines;
                 o.TileLocation = placeInMineForShoes;
-                QuestSetup.Instance.Monitor.VerboseLog($"{ObjectIds.AlexesOldShoe} placed at {placeInMineForShoes.X},{placeInMineForShoes.Y}");
+                ModEntry.Instance.Monitor.VerboseLog($"{ObjectIds.AlexesOldShoe} placed at {placeInMineForShoes.X},{placeInMineForShoes.Y}");
                 o.IsSpawnedObject = true;
                 mines.objects[o.TileLocation] = o;
             }

@@ -10,7 +10,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
     internal class LoaderQuestController
         : BaseQuestController<LoaderQuestState, LoaderQuest>
     {
-        public LoaderQuestController(QuestSetup mod)
+        public LoaderQuestController(ModEntry mod)
             : base(mod)
         {
             // TODO: If the quest isn't complete, register an inventory listener, looking for old and new shoes.

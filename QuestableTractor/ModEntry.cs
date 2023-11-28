@@ -14,7 +14,7 @@ using StardewValley.GameData.Tools;
 
 namespace NermNermNerm.Stardew.QuestableTractor
 {
-    public class QuestSetup
+    public class ModEntry
         : Mod
     {
         private IReadOnlyCollection<BaseQuestController> QuestControllers = null!;
@@ -23,18 +23,15 @@ namespace NermNermNerm.Stardew.QuestableTractor
         private SeederQuestController seederQuestController = null!;
         private WatererQuestController watererQuestController = null!;
 
-        // Mirrored from ModEntry  IMO, this is how it should be declared there.  Doing it this way for least-intrusion.
-        public const string GarageBuildingId = "Pathoschild.TractorMod_Stable";
-
         public const string SpritesPseudoPath = "Mods/NermNermNerm/QuestableTractor/Sprites";
 
         public Harmony Harmony = null!;
         internal readonly TractorModConfig TractorModConfig;
 
         // TODO: See if we can get rid of this.
-        public static QuestSetup Instance = null!;
+        public static ModEntry Instance = null!;
 
-        public QuestSetup()
+        public ModEntry()
         {
             Instance = this;
             this.TractorModConfig = new TractorModConfig(this);
@@ -75,7 +72,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             if (Game1.player is not null && Game1.player.currentLocation is not null && itemInHand is not null && Game1.player.currentLocation == Game1.getFarm()
                 && Game1.player.currentLocation.buildings
                     .OfType<Stable>()
-                    .Where(s => s.buildingType.Value == GarageBuildingId)
+                    .Where(s => s.buildingType.Value == TractorModConfig.GarageBuildingId)
                     .Any(s => IsPlayerInGarage(Game1.player, s)))
             {
                 foreach (var qc in this.QuestControllers.Where(qc => qc.WorkingAttachmentPartId == itemInHand.ItemId))
@@ -101,8 +98,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 return;
             }
 
-            this.TractorModConfig.OnDayStarted();
-
             foreach (var qc in this.QuestControllers)
             {
                 qc.OnDayStarted();
@@ -111,6 +106,8 @@ namespace NermNermNerm.Stardew.QuestableTractor
             RestoreTractorQuest.OnDayStarted(this);
             BorrowHarpoonQuest.OnDayStarted(this);
             this.SetupMissingPartConversations();
+            this.TractorModConfig.OnDayStarted();
+            this.TractorModConfig.IsGarageBuildingAvailable = RestoreTractorQuest.IsBuildingUnlocked;
         }
 
         private void SetupMissingPartConversations()
@@ -234,36 +231,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             {
                 e.Edit(editor =>
                 {
-                    // TODO: It'd be nice if we could do  ' if (this.IsQuestReadyForTractorBuilding())'
-                    //   but it looks like the game builds its list of buildings before a save is even
-                    //   loaded, so we can't use any sort of context here.
-
-                    // Note that the cost isn't configurable here because:
-                    //  1. The whole idea of the quest is to tune it to other events in the game.
-                    //  2. There are several other quest objectives that have requirements besides
-                    //     the garage and doing them all would be kinda out of hand.
-                    //  3. The requirements are designed to be very manageable.  People who just
-                    //     want an easy button tractor should just nerf the requirements in non-quest
-                    //     mode.
-                    //
-                    // Note that the practical length limit of the mats list is 3 - because of the size of
-                    //   the shop-for-buildings dialog at Robin's shop.  It'd be nice if we could make
-                    //   a bit of a story out of the cup of coffee.
-
-                    if (editor.AsDictionary<string, BuildingData>().Data.TryGetValue(GarageBuildingId, out BuildingData? value))
-                    {
-                        value.BuildCost = 350;
-                        value.BuildMaterials = new List<BuildingMaterial>
-                        {
-                            new BuildingMaterial() { ItemId = "(O)388", Amount = 3 }, // 3 Wood
-                            new BuildingMaterial() { ItemId = "(O)390", Amount = 5 }, // 5 Stone
-                            new BuildingMaterial() { ItemId = "(O)395", Amount = 1 }, // 1 cup of coffee
-                        };
-                    }
-                    else
-                    {
-                        this.Monitor.Log($"It looks like TractorMod is not loaded - {GarageBuildingId} does not exist");
-                    }
+                    this.TractorModConfig.EditBuildings(editor);
                 });
             }
             else if (e.NameWithoutLocale.IsEquivalentTo("Data/Objects"))

@@ -12,7 +12,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
 {
     public class ScytheQuestController : BaseQuestController<ScytheQuestState, ScytheQuest>
     {
-        public ScytheQuestController(QuestSetup mod)
+        public ScytheQuestController(ModEntry mod)
             : base(mod)
         { }
 

@@ -33,7 +33,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
                     Type = "Litter",
                     Category = -999,
                     Price = 0,
-                    Texture = QuestSetup.SpritesPseudoPath,
+                    Texture = ModEntry.SpritesPseudoPath,
                     SpriteIndex = spriteIndex,
                     ContextTags = new() { "not_giftable", "not_placeable", "prevent_loss_on_death" },
                 };

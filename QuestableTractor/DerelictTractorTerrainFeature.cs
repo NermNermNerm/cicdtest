@@ -23,7 +23,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             this.tile = tile;
         }
 
-        public static void PlaceInField(QuestSetup mod)
+        public static void PlaceInField(ModEntry mod)
         {
             Game1.player.modData.TryGetValue(ModDataKeys.DerelictPosition, out string? positionAsString);
             if (positionAsString is null || !TryParse(positionAsString, out Vector2 position))
@@ -46,7 +46,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             Place(mod, position);
         }
 
-        public static Vector2 GetClearSpotForTractor(QuestSetup mod)
+        public static Vector2 GetClearSpotForTractor(ModEntry mod)
         {
             // Find a spot under a tree on the West side of the map
             var farm = Game1.getFarm();
@@ -106,18 +106,21 @@ namespace NermNermNerm.Stardew.QuestableTractor
             return new Vector2();
         }
 
-        public static void PlaceInGarage(QuestSetup mod, Stable garage)
+        public static void PlaceInGarage(ModEntry mod, Stable garage)
         {
             Place(mod, new Vector2(garage.tileX.Value + 1, garage.tileY.Value + 1));
         }
 
-        private static void Place(QuestSetup mod, Vector2 position)
+        private static void Place(ModEntry mod, Vector2 position)
         {
             var derelictTractorTexture = mod.Helper.ModContent.Load<Texture2D>("assets/rustyTractor.png");
 
             var tf = new DerelictTractorTerrainFeature(derelictTractorTexture, position);
-            Game1.getFarm().terrainFeatures.Add(position, tf);
-            Game1.getFarm().terrainFeatures.Add(position + new Vector2(1, 0), tf);
+
+            Game1.getFarm().removeObject(position, showDestroyedObject: false);
+            Game1.getFarm().removeObject(position + new Vector2(1, 0), showDestroyedObject: false);
+            Game1.getFarm().terrainFeatures[position] = tf;
+            Game1.getFarm().terrainFeatures[position + new Vector2(1, 0)] = tf;
         }
 
         private static bool TryParse(string s, out Vector2 position)
