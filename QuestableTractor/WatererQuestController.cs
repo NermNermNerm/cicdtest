@@ -44,7 +44,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         public override void OnDayStarted()
         {
-            chanceOfCatchingQuestItem = 0;
             if (this.IsStarted)
             {
                 chanceOfCatchingQuestItem = 0; // No chance - already pulled it up.
