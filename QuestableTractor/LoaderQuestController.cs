@@ -48,6 +48,15 @@ namespace NermNermNerm.Stardew.QuestableTractor
             {
                 quest.State = LoaderQuestState.DisguiseTheShoes;
             }
+
+            if (Game1.player.currentLocation.Name == "Mine")
+            {
+                // crazy long duration since the player could take a while getting hold of the language scrolls.
+                // Note that if the player talks to the dwarf, it'll probably eat this event anyway.  Such is life.
+                Game1.player.activeDialogueEvents.Add(ConversationKeys.DwarfShoesTaken, 100);
+            }
+
+            LoaderQuest.RemoveShoesNearDwarf();
         }
 
         private void OnPlayerGotDisguisedShoe(Item dyedShoes)

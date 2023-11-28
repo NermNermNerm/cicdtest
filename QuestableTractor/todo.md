@@ -2,11 +2,11 @@
 * Can find shoes in garbage
 * Install new assets
 * Make the scythe crafting recipe disappear after the quest closes
-* Add the Dwarf/alex's-shoes conversation key
 * After tractor main quest is complete, building cost goes up.
 * Maybe a factory method in the controller would be a better thing for quest initialization.
 
 Done
+* Add the Dwarf/alex's-shoes conversation key
 * Make AddItemToInventory chuck objects as litter if inventory full
 * Make the tractor garage only available after the quest is started
 * Get proper Harmony module loaded
