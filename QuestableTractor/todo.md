@@ -1,5 +1,4 @@
 ﻿
-* Make AddItemToInventory chuck objects as litter if inventory full
 * Can find shoes in garbage
 * Install new assets
 * Make the scythe crafting recipe disappear after the quest closes
@@ -8,6 +7,7 @@
 * Maybe a factory method in the controller would be a better thing for quest initialization.
 
 Done
+* Make AddItemToInventory chuck objects as litter if inventory full
 * Make the tractor garage only available after the quest is started
 * Get proper Harmony module loaded
 * Separate Questable into its own mod

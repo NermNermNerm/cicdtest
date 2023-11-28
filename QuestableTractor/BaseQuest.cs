@@ -137,8 +137,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         protected void AddItemToInventory(string itemId)
         {
-            // TODO: Make it scatter the item to litter if no room in inventory
-            _ = Game1.player.addItemToInventory(new StardewValley.Object(itemId, 1));
+            Game1.player.addItemByMenuIfNecessary(new StardewValley.Object(itemId, 1));
         }
 
         protected bool TryTakeItemsFromPlayer(string itemId, int count = 1)

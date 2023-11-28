@@ -145,7 +145,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
             else if (n.Name == "George" && this.State == SeederQuestState.GetPartFromGeorge)
             {
-                Game1.player.addItemToInventory(new StardewValley.Object(ObjectIds.WorkingSeeder, 1));
+                this.AddItemToInventory(ObjectIds.WorkingSeeder);
                 this.Spout(n, "There you go.  Fixed it myself.  Alex didn't screw it up too much; he's a good kid.#$b#Don't try and sprinkle chicken manure with the thing.  I don't want to see this thing back here again.");
                 Game1.player.changeFriendship(240, n);
                 n.doEmote(20); //hearts

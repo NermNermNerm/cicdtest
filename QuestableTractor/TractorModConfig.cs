@@ -59,9 +59,12 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         private void SetupTool(string toolName, bool isEnabled, string enabledModes)
         {
+            // This is sorta what the golden path would look like:
+            // object? tractorModApi = this.mod.Helper.ModRegistry.GetApi(TractorModId)!;
+
+            // But today...
             var modInfo = this.mod.Helper.ModRegistry.Get(TractorModId)!;
             object tractorModApi = modInfo.GetType().GetProperty("Mod")!.GetValue(modInfo)!;
-            // object? tractorModApi = this.mod.Helper.ModRegistry.GetApi(TractorModId)!;
             var configProp = tractorModApi.GetType().GetField("Config", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.GetField)!;
             object? tractorModConfig = configProp.GetValue(tractorModApi)!;
             var stdAttachProp = tractorModConfig.GetType().GetProperty("StandardAttachments")!;
@@ -93,24 +96,9 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         internal void EditBuildings(IAssetData editor)
         {
-            // TODO: It'd be nice if we could do  ' if (this.IsQuestReadyForTractorBuilding())'
-            //   but it looks like the game builds its list of buildings before a save is even
-            //   loaded, so we can't use any sort of context here.
-
-            // Note that the cost isn't configurable here because:
-            //  1. The whole idea of the quest is to tune it to other events in the game.
-            //  2. There are several other quest objectives that have requirements besides
-            //     the garage and doing them all would be kinda out of hand.
-            //  3. The requirements are designed to be very manageable.  People who just
-            //     want an easy button tractor should just nerf the requirements in non-quest
-            //     mode.
-            //
-            // Note that the practical length limit of the mats list is 3 - because of the size of
-            //   the shop-for-buildings dialog at Robin's shop.  It'd be nice if we could make
-            //   a bit of a story out of the cup of coffee.
-
             if (editor.AsDictionary<string, BuildingData>().Data.TryGetValue(GarageBuildingId, out BuildingData? value))
             {
+                // TODO: change these costs after the first build.  Not sure why anybody would want to build a second garage tho.  Multiplayer?
                 value.BuildCost = 350;
                 value.BuildMaterials = new List<BuildingMaterial>
                 {
