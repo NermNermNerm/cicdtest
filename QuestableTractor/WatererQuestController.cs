@@ -67,7 +67,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
                     // It might be wiser to not do it until we know the quest hasn't been started
                     var farmType = typeof(Farm);
                     var getFishMethod = farmType.GetMethod("getFish");
-                    this.mod.Harmony.Patch(getFishMethod, prefix: new HarmonyMethod(typeof(WatererQuestController), nameof(Prefix_GetFish)));
+                    this.Mod.Harmony.Patch(getFishMethod, prefix: new HarmonyMethod(typeof(WatererQuestController), nameof(Prefix_GetFish)));
                     hasPatchBeenInstalled = true;
                 }
             }

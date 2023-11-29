@@ -9,6 +9,7 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.GameData.Buildings;
+using StardewValley.GameData.GarbageCans;
 using StardewValley.GameData.Objects;
 using StardewValley.GameData.Tools;
 
@@ -166,63 +167,16 @@ namespace NermNermNerm.Stardew.QuestableTractor
             return (Game1.player.modData.TryGetValue(key, out string value) && Enum.TryParse(value, out T result)) ? result : default(T);
         }
 
-        //internal AxeConfig GetAxeConfig(AxeConfig configured)
-        //{
-        //    return GetModConfig<LoaderQuestState>(ModDataKeys.LoaderQuestStatus) == LoaderQuestState.Complete
-        //        ? configured : Disabled<AxeConfig>();
-        //}
-
-        //internal PickAxeConfig GetPickConfig(PickAxeConfig configured)
-        //{
-        //    return GetModConfig<LoaderQuestState>(ModDataKeys.LoaderQuestStatus) == LoaderQuestState.Complete
-        //        ? configured : Disabled<PickAxeConfig>();
-        //}
-
-        //internal GenericAttachmentConfig GetSeederConfig(GenericAttachmentConfig configured)
-        //{
-        //    return GetModConfig<SeederQuestState>(ModDataKeys.SeederQuestStatus) == SeederQuestState.Complete
-        //        ? configured : Disabled<GenericAttachmentConfig>();
-        //}
-
-        //internal ScytheConfig GetScytheConfig(ScytheConfig configured)
-        //{
-        //    // The harvester default config is pretty broad, but there's nothing unrealistic or out of hand about it.
-        //    return GetModConfig<ScytheQuestState>(ModDataKeys.ScytheQuestStatus) == ScytheQuestState.Complete
-        //        ? configured : Disabled<ScytheConfig>();
-        //}
-
-        //internal GenericAttachmentConfig GetScytheConfig(GenericAttachmentConfig configured)
-        //{
-        //    return Disabled<GenericAttachmentConfig>();
-        //}
-
-        //internal GenericAttachmentConfig GetWateringCanConfig(GenericAttachmentConfig configured)
-        //{
-        //    return GetModConfig<WatererQuestState>(ModDataKeys.WateringQuestStatus) == WatererQuestState.Complete
-        //        ? configured : Disabled<GenericAttachmentConfig>();
-        //}
-
-        //internal HoeConfig GetHoeConfig(HoeConfig configured)
-        //{
-        //    // By default, the Hoe has amazing powers.  This variant of the mod tones it down.
-        //    HoeConfig limitedConfig = Disabled<HoeConfig>();
-        //    limitedConfig.TillDirt = true;
-        //    limitedConfig.ClearWeeds = configured.ClearWeeds; // <- if you run a real plow over a weed, it's a bad day for the weed... unless maybe it's a dandilion, then it only makes it stronger.
-        //    return limitedConfig;
-        //}
-
-        internal T GetUnsupportedConfig<T>(T configured)
-            where T : new()
-        {
-            return Disabled<T>();
-        }
-
         internal void OnAssetRequested(object? _, AssetRequestedEventArgs e)
         {
             // this.Monitor.Log($"OnAssetRequested({e.NameWithoutLocale.Name})");
             if (e.NameWithoutLocale.IsEquivalentTo(SpritesPseudoPath))
             {
                 e.LoadFromModFile<Texture2D>("assets/Sprites.png", AssetLoadPriority.Exclusive);
+            }
+            else if (e.NameWithoutLocale.IsEquivalentTo("Data/GarbageCans"))
+            {
+                e.Edit(editor => this.loaderQuestController.EditGarbageCanAsset(editor.GetData<GarbageCanData>()));
             }
             else if (e.NameWithoutLocale.IsEquivalentTo("Data/Buildings"))
             {

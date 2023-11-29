@@ -9,7 +9,14 @@ namespace NermNermNerm.Stardew.QuestableTractor
 {
     public abstract class BaseQuestController
     {
+        protected BaseQuestController(ModEntry mod)
+        {
+            this.Mod = mod;
+        }
+
         protected const string QuestCompleteStateMagicWord = "Complete";
+
+        public ModEntry Mod { get; }
 
         public abstract void OnDayStarted();
         public abstract void OnDayEnding();
@@ -33,12 +40,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
         where TStateEnum : struct, Enum
         where TQuest : BaseQuest<TStateEnum>, new()
     {
-        protected readonly ModEntry mod;
-
-        protected BaseQuestController(ModEntry mod)
-        {
-            this.mod = mod;
-        }
+        protected BaseQuestController(ModEntry mod) : base(mod) { }
 
         public virtual void AnnounceGotBrokenPart(Item brokenPart)
         {
@@ -50,11 +52,13 @@ namespace NermNermNerm.Stardew.QuestableTractor
         /// </summary>
         protected virtual void OnQuestStarted() { }
 
-        public void PlayerGotBrokenPart(Item brokenPart)
+        public TQuest? GetQuest() => Game1.player.questLog.OfType<TQuest>().FirstOrDefault();
+
+        internal void PlayerGotBrokenPart(Item brokenPart)
         {
             if (Game1.player.questLog.OfType<TQuest>().Any())
             {
-                this.mod.Monitor.Log($"Player found a broken attachment, {brokenPart.ItemId}, when the quest was active?!");
+                this.Mod.Monitor.Log($"Player found a broken attachment, {brokenPart.ItemId}, when the quest was active?!");
                 return;
             }
 
@@ -71,7 +75,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             var quest = Game1.player.questLog.OfType<TQuest>().FirstOrDefault();
             if (quest is null)
             {
-                this.mod.Monitor.Log($"Player found a working attachment, {workingPart.ItemId}, when the quest was not active?!", LogLevel.Warn);
+                this.Mod.Monitor.Log($"Player found a working attachment, {workingPart.ItemId}, when the quest was not active?!", LogLevel.Warn);
                 // consider recovering by creating the quest?
                 return;
             }
@@ -86,7 +90,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             activeQuest?.questComplete();
             if (activeQuest is null)
             {
-                this.mod.Monitor.Log($"An active {nameof(TQuest)} should exist, but doesn't?!", LogLevel.Warn);
+                this.Mod.Monitor.Log($"An active {nameof(TQuest)} should exist, but doesn't?!", LogLevel.Warn);
             }
             Game1.player.modData[this.ModDataKey] = QuestCompleteStateMagicWord;
             Game1.player.removeFirstOfThisItemFromInventory(this.WorkingAttachmentPartId);
@@ -100,7 +104,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
         {
             if (!Enum.TryParse(storedValue, out TStateEnum parsedValue))
             {
-                this.mod.Monitor.Log($"Invalid value for moddata key, '{this.ModDataKey}': '{storedValue}' - quest state will revert to not started.", LogLevel.Error);
+                this.Mod.Monitor.Log($"Invalid value for moddata key, '{this.ModDataKey}': '{storedValue}' - quest state will revert to not started.", LogLevel.Error);
                 return null;
             }
             else
@@ -117,7 +121,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             this.itemsToWatch[itemId] = onItemAdded;
             if (!this.isWatchingInventory)
             {
-                this.mod.Helper.Events.Player.InventoryChanged += this.Player_InventoryChanged;
+                this.Mod.Helper.Events.Player.InventoryChanged += this.Player_InventoryChanged;
                 this.isWatchingInventory = true;
             }
         }
@@ -127,7 +131,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             this.itemsToWatch.Remove(itemId);
             if (!this.itemsToWatch.Any() && this.isWatchingInventory)
             {
-                this.mod.Helper.Events.Player.InventoryChanged -= this.Player_InventoryChanged;
+                this.Mod.Helper.Events.Player.InventoryChanged -= this.Player_InventoryChanged;
                 this.isWatchingInventory = false;
             }
         }
@@ -202,7 +206,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             var existing = farm.objects.Values.FirstOrDefault(o => o.ItemId == this.BrokenAttachmentPartId);
             if (existing is not null)
             {
-                this.mod.Monitor.VerboseLog($"{this.BrokenAttachmentPartId} is already placed at {existing.TileLocation.X},{existing.TileLocation.Y}");
+                this.Mod.Monitor.VerboseLog($"{this.BrokenAttachmentPartId} is already placed at {existing.TileLocation.X},{existing.TileLocation.Y}");
                 return;
             }
 
@@ -212,7 +216,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 var o = ItemRegistry.Create<StardewValley.Object>(this.BrokenAttachmentPartId);
                 o.Location = Game1.getFarm();
                 o.TileLocation = position;
-                this.mod.Monitor.VerboseLog($"{this.BrokenAttachmentPartId} placed at {position.X},{position.Y}");
+                this.Mod.Monitor.VerboseLog($"{this.BrokenAttachmentPartId} placed at {position.X},{position.Y}");
                 o.IsSpawnedObject = true;
                 farm.objects[o.TileLocation] = o;
             }
@@ -227,14 +231,14 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 return bottomMostResourceClump.Tile;
             }
 
-            this.mod.Monitor.Log($"Couldn't find the preferred location ({preferredResourceClumpToHideUnder}) for the {this.BrokenAttachmentPartId}", LogLevel.Warn);
+            this.Mod.Monitor.Log($"Couldn't find the preferred location ({preferredResourceClumpToHideUnder}) for the {this.BrokenAttachmentPartId}", LogLevel.Warn);
             bottomMostResourceClump = farm.resourceClumps.OrderByDescending(tf => tf.Tile.Y).FirstOrDefault();
             if (bottomMostResourceClump is not null)
             {
                 return bottomMostResourceClump.Tile;
             }
 
-            this.mod.Monitor.Log($"The farm contains no resource clumps under which to stick the {this.BrokenAttachmentPartId}", LogLevel.Warn);
+            this.Mod.Monitor.Log($"The farm contains no resource clumps under which to stick the {this.BrokenAttachmentPartId}", LogLevel.Warn);
 
             // We're probably dealing with an old save,  Try looking for any clear space.
             //  This technique is kinda dumb, but whatev's.  This mod is pointless on a fully-developed farm.
@@ -247,7 +251,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 }
             }
 
-            this.mod.Monitor.Log($"Couldn't find any place at all to put the {this.BrokenAttachmentPartId}", LogLevel.Error);
+            this.Mod.Monitor.Log($"Couldn't find any place at all to put the {this.BrokenAttachmentPartId}", LogLevel.Error);
             return default;
         }
     }

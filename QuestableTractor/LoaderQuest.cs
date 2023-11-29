@@ -1,6 +1,9 @@
+using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using StardewValley;
+using StardewValley.GameData.GarbageCans;
+using StardewValley.Quests;
 
 namespace NermNermNerm.Stardew.QuestableTractor
 {
@@ -109,8 +112,9 @@ namespace NermNermNerm.Stardew.QuestableTractor
         {
             if (n?.Name == "Clint" && this.State == LoaderQuestState.TalkToClint)
             {
-                this.Spout(n, "Shoes.  That's my problem.  I wear these dusty old work boots all over the place.$2#$b#What??  Oh.  Sorry.  Just been a bit distracted because I saw on TV that women judge a man by their shoes and look at these...  No wonder I've got no luck with the ladies.$3#$b#What?  You want me to fix that thing?  Sure, looks like it'd be just a bit of reforging, some welds here and there...#$b#Wait!  You're from the city, you know all about shoes!  Tell you what, you get me a nice pair of shoes and I'll fix your loader.  Deal??#$b#GREAT!  I wear 14EEE.");
+                this.Spout(n, "Shoes.  That's my problem.  I wear these scuffed up old work boots all over the place.$2#$b#What??  Oh.  Sorry.  Just been a bit distracted because I saw on TV that women judge a man by their shoes and look at these...  No wonder I've got no luck with the ladies.$3#$b#What?  You want me to fix that thing?  Sure, looks like it'd be just a bit of reforging, some welds here and there...#$b#Wait!  You're from the city, you know all about shoes!  Tell you what, you get me a nice pair of shoes and I'll fix your loader.  Deal??#$b#GREAT!  I wear 14EEE.");
                 this.State = LoaderQuestState.FindSomeShoes;
+                this.InvalidateGarbageCanData();
             }
             else if (n?.Name == "Sam" && this.State < LoaderQuestState.SnagAlexsOldShoes && this.State > LoaderQuestState.TalkToClint)
             {
@@ -152,7 +156,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
             else if (n?.Name == "Clint" && this.TryTakeItemsFromPlayer(ObjectIds.BustedLoader, 1, ObjectIds.DisguisedShoe, 1))
             {
-                this.Spout(n, "Ah, these shoes look great!  Fit good too.  But somehow I still don't quite feel like a ladykiller.  Well, time will tell!#$b#You can pick it up in a couple days.");
+                this.Spout(n, "Ah, these shoes look great!  Fit good too.  But somehow I still don't quite feel like a ladykiller.#$b#Welp.  A deal's a deal.  I'll fix the loader.  You can pick it up in a couple days.");
                 this.State = LoaderQuestState.WaitForClint1;
             }
             else if (n?.Name == "Clint" && this.State == LoaderQuestState.PickUpLoader)
@@ -209,10 +213,57 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
         }
 
-        private void RemoveShoesNearDwarf()
+        static internal void RemoveShoesNearDwarf()
         {
             var mines = Game1.locations.FirstOrDefault(l => l.Name == "Mine");
             mines?.removeObject(placeInMineForShoes, showDestroyedObject: false);
+        }
+
+        private void InvalidateGarbageCanData()
+        {
+            this.Controller.Mod.Helper.GameContent.InvalidateCache("Data/GarbageCans");
+        }
+
+        internal void EditGarbageCanAsset(GarbageCanData gcd)
+        {
+            if (this.State >= LoaderQuestState.FindSomeShoes && this.State < LoaderQuestState.DisguiseTheShoes)
+            {
+                gcd.GarbageCans["Evelyn"].Items.Add(new GarbageCanItemData()
+                {
+                    ItemId = ObjectIds.AlexesOldShoe,
+                    IgnoreBaseChance = true,
+                    Condition = "RANDOM 0.3 @addDailyLuck",
+                    Id = "QuestableTractor.AlexesOldShoe",
+                });
+            }
+        }
+
+        internal void OnPlayerGotOldShoes(Item oldShoes)
+        {
+            Game1.player.holdUpItemThenMessage(oldShoes);
+            if (this.State < LoaderQuestState.DisguiseTheShoes)
+            {
+                this.State = LoaderQuestState.DisguiseTheShoes;
+            }
+
+            if (Game1.player.currentLocation.Name == "Mine")
+            {
+                // crazy long duration since the player could take a while getting hold of the language scrolls.
+                // Note that if the player talks to the dwarf, it'll probably eat this event anyway.  Such is life.
+                Game1.player.activeDialogueEvents.Add(ConversationKeys.DwarfShoesTaken, 100);
+            }
+
+            this.InvalidateGarbageCanData();
+            RemoveShoesNearDwarf();
+        }
+
+        internal void OnPlayerGotDisguisedShoes(Item dyedShoes)
+        {
+            Game1.player.holdUpItemThenMessage(dyedShoes);
+            if (this.State < LoaderQuestState.GiveShoesToClint)
+            {
+                this.State = LoaderQuestState.GiveShoesToClint;
+            }
         }
     }
 }
