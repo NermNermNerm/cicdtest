@@ -102,8 +102,8 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 value.BuildCost = 350;
                 value.BuildMaterials = new List<BuildingMaterial>
                 {
-                    new BuildingMaterial() { ItemId = "(O)388", Amount = 3 }, // 3 Wood
-                    new BuildingMaterial() { ItemId = "(O)390", Amount = 5 }, // 5 Stone
+                    new BuildingMaterial() { ItemId = "(O)388", Amount = 300 }, // Wood
+                    new BuildingMaterial() { ItemId = "(O)390", Amount = 200 }, // Stone
                     new BuildingMaterial() { ItemId = "(O)395", Amount = 1 }, // 1 cup of coffee
                 };
                 value.Builder = (this.isBuildingAvailable ? "Robin" : null);

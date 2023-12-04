@@ -17,6 +17,18 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         private bool hasDoneStatusCheckToday = false;
 
+        private record EngineRequirement(string itemId, string displayName, int quantity);
+        private static readonly List<EngineRequirement> engineRequirements = new()
+        {
+            new EngineRequirement(ObjectIds.BustedEngine, "the engine", 1),
+            new EngineRequirement("92", "20 sap", 20),
+            new EngineRequirement("770", "5 mixed seeds", 5),
+            new EngineRequirement("62", "an aquamarine", 1),
+        };
+
+        private static string combineEngineRequirementsText =
+            $"{string.Join(", ", engineRequirements.Take(engineRequirements.Count - 1).Select(er => er.displayName))}, and {engineRequirements.Last().displayName}";
+
         public RestoreTractorQuest()
             : this(RestorationState.TalkToLewis)
         {
@@ -77,7 +89,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
                     break;
 
                 case RestorationState.BringStuffToForest:
-                    this.currentObjective = "Put the motor, the bat wing, 20 sap, 20 mixed seeds and an Aquamarine in a chest in the secret woods.";
+                    this.currentObjective = $"Put {combineEngineRequirementsText} in a chest in the secret woods.";
                     break;
 
                 case RestorationState.BringEngineToSebastian:
@@ -137,67 +149,27 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         public static bool CheckForest()
         {
-            var forest = Game1.getLocationFromName("Woods");
-            bool hasSap = false, hasEngine = false, hasSeeds = false, hasGem = false;
-            foreach (var chest in forest.objects.Values.OfType<Chest>())
-            {
-                foreach (var item in chest.Items)
-                {
-                    if (item.ItemId == "92" && item.Stack >= 20)
-                    {
-                        hasSap = true;
-                    }
-                    if (item.ItemId == ObjectIds.BustedEngine)
-                    {
-                        hasEngine = true;
-                    }
-                    if (item.ItemId == "770" && item.Stack >= 20)
-                    {
-                        hasSeeds = true;
-                    }
-                    if (item.ItemId == "62")
-                    {
-                        hasGem = true;
-                    }
-                }
-            }
+            var magicChest = Game1.getLocationFromName("Woods").objects.Values.OfType<Chest>()
+                .FirstOrDefault(chest => engineRequirements.All(er => chest.Items.Any(i => i.ItemId == er.itemId && i.Stack >= er.quantity)));
 
-            if (!hasSap || !hasEngine || !hasSeeds || !hasGem)
+            if (magicChest == null)
             {
                 return false;
             }
 
-            foreach (var chest in forest.objects.Values.OfType<Chest>())
+            foreach (var requirement in engineRequirements)
             {
-                List<Item> toRemove = new List<Item>();
-                List<Item> toAdd = new List<Item>();
-                foreach (var item in chest.Items)
+                var item = magicChest.Items.First(i => i.ItemId == requirement.itemId && i.Stack >= requirement.quantity);
+                if (item.Stack > requirement.quantity)
                 {
-                    if (item.ItemId == "92" && item.Stack >= 20)
-                    {
-                        toRemove.Add(item); // Keeping it simple: If you give the Junimo's more than 20, that's like tipping them.
-                    }
-                    if (item.ItemId == ObjectIds.BustedEngine)
-                    {
-                        toRemove.Add(item);
-                        toAdd.Add(new StardewValley.Object(ObjectIds.WorkingEngine, 1));
-                    }
-                    if (item.ItemId == "770" && item.Stack >= 20)
-                    {
-                        toRemove.Add(item);
-                    }
-                    if (item.ItemId == "62")
-                    {
-                        toRemove.Add(item);
-                    }
+                    item.Stack -= requirement.quantity;
                 }
-
-                foreach (var deadItem in toRemove)
+                else
                 {
-                    chest.Items.Remove(deadItem);
+                    magicChest.Items.Remove(item);
                 }
-                chest.Items.AddRange(toAdd);
             }
+            magicChest.Items.Add(new StardewValley.Object(ObjectIds.WorkingEngine, 1));
 
             return true;
         }
@@ -292,7 +264,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
             else if (n?.Name == "Wizard" && this.state == RestorationState.TalkToWizard && item?.ItemId == ObjectIds.BustedEngine)
             {
-                Spout(n, "Oh...  Now where did you get that??!$l#$b#Ooooh... Ah.  Yes.  I see...  Mmm...$s#$b#Yes.  Your grandfather dabbled a bit in Forest Magic.  He was nowhere near as adept as myself, of course...#$b#He lacked the mechanical ability to restore the mundane engine, so he enlisted some forest magic to make one.#$b#As you can see, the Junimos that he recruited to keep the motor running have gotten bored and wandered away.  You'll need to coax them back.$s#$b#Now, pay attention!  This will require your utmost concentration!$a#$b#You must place the engine, 20 sap, 20 mixed seeds, and an aquamarine in a chest in the secret woods in front of the statue...#$b#Then, you must run around the chest, six times, clockwise very, very quickly.  Overnight, your engine will be restored.#$b#Now GO!  I have concerns much greater than yours right now.$a");
+                Spout(n, $"Oh...  Now where did you get that??!$l#$b#Ooooh... Ah.  Yes.  I see...  Mmm...$s#$b#Yes.  Your grandfather dabbled a bit in Forest Magic.  He was nowhere near as adept as myself, of course...#$b#He lacked the mechanical ability to restore the mundane engine, so he enlisted some forest magic to make one.#$b#As you can see, the Junimos that he recruited to keep the motor running have gotten bored and wandered away.  You'll need to coax them back.$s#$b#Now, pay attention!  This will require your utmost concentration!$a#$b#You must place {combineEngineRequirementsText} in a chest in the secret woods in front of the statue...#$b#Then, you must run around the chest, six times, clockwise very, very quickly.  Overnight, your engine will be restored.#$b#Now GO!  I have concerns much greater than yours right now.$a");
                 this.SetState(RestorationState.BringStuffToForest);
             }
             else if (n?.Name == "Sebastian" && item?.ItemId == ObjectIds.BustedEngine)

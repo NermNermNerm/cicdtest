@@ -113,7 +113,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             // Our stuff recurs every week for 4 days out of the week.  Delay until after the
             // first week so that the introductions quest runs to completion.  Perhaps it
             // would be better to delay until all the villagers we care about have been greeted.
-            if (Game1.Date.DayOfWeek != DayOfWeek.Sunday || Game1.Date.TotalDays < 7)
+            if (Game1.Date.DayOfWeek != DayOfWeek.Sunday)
             {
                 return;
             }
