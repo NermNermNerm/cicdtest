@@ -42,47 +42,47 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 BustedEngine,
                 "funky looking engine that doesn't work", // TODO: 18n
                 "Sebastian pulled this off of the rusty tractor.  I need to find someone to fix it.", // TODO: 18n
-                0);
+                10);
             addQuestItem(
                 WorkingEngine,
                 "working Junimo-powered engine", // TODO: 18n
                 "The engine for the tractor!  I need to find someone to install it.", // TODO: 18n
-                1);
+                0);
             addQuestItem(
                 BustedScythe,
                 "core of the harvesting attachment for the tractor", // TODO: 18n
                 "This looks like it was a tractor attachment for harvesting crops, but it doesn't seem to be all together.", // TODO: 18n
-                2);
+                12);
             addQuestItem(
                 WorkingScythe,
                 "harvesting attachment for the tractor", // TODO: 18n
                 "Just need to bring this to the tractor garage to be able to use it with the tractor!", // TODO: 18n
-                3);
+                2);
             addQuestItem(
                 ScythePart1,
-                "crop shakerlooser", // TODO: 18n
+                "shiny sprocket", // TODO: 18n
                 "One of the missing parts for the scythe attachment", // TODO: 18n
-                4);
+                6);
             addQuestItem(
                 ScythePart2,
-                "fruity grabengetter", // TODO: 18n
+                "crop shakerlooser", // TODO: 18n
                 "One of the missing parts for the scythe attachment", // TODO: 18n
-                5);
+                7);
             addQuestItem(
                 BustedWaterer,
                 "broken watering attachment for the tractor", // TODO: 18n
                 "This looks like it was a tractor attachment for watering crops.  Sure hope somebody can help me get it working again, watering can really be a drag.", // TODO: 18n
-                6);
+                1);
             addQuestItem(
                 WorkingWaterer,
                 "watering attachment for the tractor", // TODO: 18n
                 "xx", // TODO: 18n
-                7);
+                1);
             addQuestItem(
                 BustedLoader,
                 "bent up and rusty front-end loader for the tractor", // TODO: 18n
                 "This was the front-end loader attachment (for picking up rocks and sticks), but it's all bent up and rusted through in spots.  It needs to be fixed to be usable.", // TODO: 18n
-                8);
+                18);
             addQuestItem(
                 WorkingLoader,
                 "front-end loader attachment for my tractor", // TODO: 18n
@@ -92,7 +92,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 AlexesOldShoe,
                 "Alex's old shoes", // TODO: 18n
                 "14EEE, slightly smudged", // TODO: 18n
-                10);
+                4);
             addQuestItem(
                 DisguisedShoe,
                 "cleverly repackaged pair of shoes", // TODO: 18n
@@ -102,12 +102,12 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 BustedSeeder,
                 "broken fertilizer and seeder", // TODO: 18n
                 "The fertilizer and seed spread for the old tractor.  It needs a good bit of fiddling to make work.", // TODO: 18n
-                12);
+                8);
             addQuestItem(
                 WorkingSeeder,
                 "fertilizer and seed Seeder attachment for the tractor", // TODO: 18n
                 "Just needs to be brought back to the garage to use it on the tractor.", // TODO: 18n
-                13);
+                14);
         }
     }
 }
