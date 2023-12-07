@@ -45,7 +45,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 10);
             addQuestItem(
                 WorkingEngine,
-                "working Junimo-powered engine", // TODO: 18n
+                "Junimo-powered tractor engine", // TODO: 18n
                 "The engine for the tractor!  I need to find someone to install it.", // TODO: 18n
                 0);
             addQuestItem(
@@ -72,11 +72,11 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 BustedWaterer,
                 "broken watering attachment for the tractor", // TODO: 18n
                 "This looks like it was a tractor attachment for watering crops.  Sure hope somebody can help me get it working again, watering can really be a drag.", // TODO: 18n
-                1);
+                20);
             addQuestItem(
                 WorkingWaterer,
                 "watering attachment for the tractor", // TODO: 18n
-                "xx", // TODO: 18n
+                "The watering attachment for the tractor - it needs to be brought back to the tractor garage.", // TODO: 18n
                 1);
             addQuestItem(
                 BustedLoader,
