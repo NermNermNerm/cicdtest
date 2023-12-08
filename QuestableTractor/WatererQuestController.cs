@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using HarmonyLib;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
@@ -67,6 +68,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
                     // It might be wiser to not do it until we know the quest hasn't been started
                     var farmType = typeof(Farm);
                     var getFishMethod = farmType.GetMethod("getFish");
+                    WatererQuestController.instance = this; // Harmony doesn't support creating prefixes with instance methods...  Faking it.
                     this.Mod.Harmony.Patch(getFishMethod, prefix: new HarmonyMethod(typeof(WatererQuestController), nameof(Prefix_GetFish)));
                     hasPatchBeenInstalled = true;
                 }
@@ -74,23 +76,47 @@ namespace NermNermNerm.Stardew.QuestableTractor
             base.OnDayStarted();
         }
 
+        private static WatererQuestController instance = null!;
+
         private static bool Prefix_GetFish(ref Item __result)
+        {
+            var newFish = instance.ReplaceFish();
+            if (newFish is null)
+            {
+                return true; // Go ahead and call the normal function.
+            }
+            else
+            {
+                __result = newFish;
+                return false; // Skip calling the function and use this result.
+            }
+        }
+
+        private Item? ReplaceFish()
         {
             if (Game1.player.currentLocation is not Farm)
             {
-                return false;
+                return null;
             }
 
             const string TrashItemId = "(O)168";
-            // TODO: Maybe it'd be cool to remember where the thing was hooked and only boost the odds like
+
+            // Consider: Maybe it'd be cool to remember where the thing was hooked and only boost the odds like
             // this if you're fishing in the same spot where you hooked it when the quest started.
             if (Game1.player.CurrentTool?.ItemId == HarpoonToolId && chanceOfCatchingQuestItem > 0)
             {
+                var borrowHarpoonQuest = Game1.player.questLog.OfType<BorrowHarpoonQuest>().FirstOrDefault();
+                if (borrowHarpoonQuest is null)
+                {
+                    this.LogError("BorrowHarpoon quest was not open when player caught waterer");
+                    return null;
+                }
+
                 if (Game1.random.NextDouble() < .3)
                 {
                     Game1.playSound("submarine_landing");
-                    BorrowHarpoonQuest.GotTheBigOne();
-                    __result = ItemRegistry.Create(ObjectIds.BustedWaterer);
+                    borrowHarpoonQuest.LandedTheWaterer();
+                    return ItemRegistry.Create(ObjectIds.BustedWaterer);
                 }
                 else
                 {
@@ -99,23 +125,21 @@ namespace NermNermNerm.Stardew.QuestableTractor
                     {
                         "Aaahhh! ! I had it!",
                         "Nope...  nothing",
-                        "OOoh so close."
+                        "Ooohhh!  So close!"
                     }[Game1.random.Next(3)];
                     Game1.addHUDMessage(new HUDMessage(message) { noIcon = true });
 
-                    __result = ItemRegistry.Create(TrashItemId);
+                    return ItemRegistry.Create(TrashItemId);
                 }
-                return false;
             }
             else if (Game1.random.NextDouble() < chanceOfCatchingQuestItem)
             {
-                __result = ItemRegistry.Create(TrashItemId);
                 BorrowHarpoonQuest.StartQuest();
-                return false;
+                return ItemRegistry.Create(TrashItemId);
             }
             else
             {
-                return true;
+                return null;
             }
         }
 

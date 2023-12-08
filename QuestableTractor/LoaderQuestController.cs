@@ -20,6 +20,10 @@ namespace NermNermNerm.Stardew.QuestableTractor
         public override string BrokenAttachmentPartId => ObjectIds.BustedLoader;
         public override string HintTopicConversationKey => ConversationKeys.LoaderNotFound;
 
+        protected override LoaderQuest CreateQuest() => new LoaderQuest();
+
+        protected override LoaderQuest CreateQuestFromDeserializedState(LoaderQuestState initialState) => new LoaderQuest(initialState);
+
         protected override void OnQuestStarted()
         {
             this.MonitorQuestItems();

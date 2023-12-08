@@ -29,12 +29,8 @@ namespace NermNermNerm.Stardew.QuestableTractor
         public Harmony Harmony = null!;
         internal readonly TractorModConfig TractorModConfig;
 
-        // TODO: See if we can get rid of this.
-        public static ModEntry Instance = null!;
-
         public ModEntry()
         {
-            Instance = this;
             this.TractorModConfig = new TractorModConfig(this);
         }
 
@@ -55,6 +51,15 @@ namespace NermNermNerm.Stardew.QuestableTractor
             this.Helper.Events.GameLoop.DayEnding += this.OnDayEnding;
         }
 
+        public void LogError(string message)
+            => this.Monitor.Log(message, LogLevel.Error);
+
+        public void LogWarning(string message)
+            => this.Monitor.Log(message, LogLevel.Warn);
+
+        public void LogVerbose(string message)
+            => this.Monitor.Log(message, LogLevel.Warn);
+
         private void UpdateTractorModConfig()
         {
             this.TractorModConfig.SetConfig(
@@ -67,6 +72,11 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         private void GameLoop_OneSecondUpdateTicked(object? sender, OneSecondUpdateTickedEventArgs e)
         {
+            if (!Context.IsMainPlayer)
+            {
+                return;
+            }
+
             var itemInHand = Game1.player?.CurrentItem;
             if (Game1.player is not null && Game1.player.currentLocation is not null && itemInHand is not null && Game1.player.currentLocation == Game1.getFarm()
                 && Game1.player.currentLocation.buildings
@@ -83,11 +93,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
         }
 
         private static bool IsPlayerInGarage(Character c, Stable b)
-        {
-            Rectangle cPos = new Rectangle(new Point((int)c.Position.X, (int)c.Position.Y-128), new Point(64, 128));
-            bool isIntersecting = b.intersects(cPos);
-            return isIntersecting;
-        }
+            => b.intersects(new Rectangle(new Point((int)c.Position.X, (int)c.Position.Y-128), new Point(64, 128)));
 
         [EventPriority(EventPriority.Low)] // Causes our OnDayStarted to come after TractorMod's, which does not set EventPriority
         public void OnDayStarted(object? sender, DayStartedEventArgs e)
@@ -142,7 +148,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
         ///   This method provides that help by converting the objects to player moddata and deleting the objects
         ///   prior to save.  <see cref="InitializeQuestable"/> restores them.
         /// </summary>
-        public void OnDayEnding(object? sender, DayEndingEventArgs e)
+        private void OnDayEnding(object? sender, DayEndingEventArgs e)
         {
             Game1.getFarm().terrainFeatures.RemoveWhere(p => p.Value is DerelictTractorTerrainFeature);
 

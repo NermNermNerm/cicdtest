@@ -45,6 +45,8 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
         }
 
+        public void LandedTheWaterer() => this.State = HarpoonQuestState.ReturnThePole;
+
         public override void GotWorkingPart(Item workingPart)
         {
             // Shouldn't happen.  There are a couple of QuestBase things that only work for part quests.
@@ -116,19 +118,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 quest.ShouldDisplayAsNew();
                 Game1.player.questLog.Add(new BorrowHarpoonQuest() { MakeSoundOnAdvancement = true });
                 Game1.playSound("questcomplete"); // Note documentation suggests its for quest complete and "journal update".  That's what we are using it for.
-            }
-        }
-
-        internal static void GotTheBigOne()
-        {
-            var quest = Game1.player.questLog.OfType<BorrowHarpoonQuest>().FirstOrDefault();
-            if (quest is null)
-            {
-                ModEntry.Instance.Monitor.Log("BorrowHarpoon quest was not open when player caught waterer", StardewModdingAPI.LogLevel.Warn);
-            }
-            else
-            {
-                quest.State = HarpoonQuestState.ReturnThePole;
             }
         }
     }

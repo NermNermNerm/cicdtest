@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using StardewValley;
 using StardewValley.Quests;
 
@@ -123,7 +122,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             // Pulling them down toggles their "only show this once" behavior.
             n.checkForNewCurrentDialogue(Game1.player.getFriendshipHeartLevelForNPC(n.Name));
 
-            // TODO: Only nix topics that are for this mod.
+            // Perhaps we should only nix topics that are for this mod?
             // Can (maybe) be culled off of the tail end of 'n.CurrentDialogue.First().TranslationKey'
             n.CurrentDialogue.Clear();
 

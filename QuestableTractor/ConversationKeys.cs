@@ -103,7 +103,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
 
 
-            // TODO: Move these somewhere else maybe?  Since they're not conversation keys
+            // Consider moving these somewhere else maybe?  Since they're not conversation keys
             if (nameWithoutLocale.IsEquivalentTo("Characters/Dialogue/Emily"))
             {
                 // Just a little color to go with the shoes quest...  I picked this day to replace because the existing dialog is pretty weak.
@@ -115,7 +115,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
             else if (nameWithoutLocale.IsEquivalentTo("Characters/Dialogue/Wizard"))
             {
-                // TODO: Make this a conversation key
+                // Consider making this a conversation key
                 topics["fall_Thu8"] = topics["winter_Thu8"]
                     = "I have a bit of a confession to make...When I told you how to repair the tractor engine, you didn't *really* need to run around it six times...  I just...  Well...#$b#Sometimes I just can't help myself.";
             }

@@ -15,7 +15,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             this.showNew.Value = true;
         }
 
-        private WatererQuest(WatererQuestState questState)
+        public WatererQuest(WatererQuestState questState)
             : base(questState)
         {
             this.questTitle = "Fix the waterer";
