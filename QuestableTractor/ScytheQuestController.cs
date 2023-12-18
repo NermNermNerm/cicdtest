@@ -24,7 +24,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
         {
             if (!TryParseQuestStatus(statusAsString, out ScytheQuestState state, out bool[] flags))
             {
-                this.Mod.Monitor.Log($"Invalid value for {ModDataKeys.ScytheQuestStatus}: {statusAsString} -- reverting to NotStarted", LogLevel.Error);
+                this.LogError($"Invalid value for {ModDataKeys.ScytheQuestStatus}: {statusAsString} -- reverting to NotStarted");
                 return null;
             }
 

@@ -16,7 +16,7 @@ using StardewValley.GameData.Tools;
 namespace NermNermNerm.Stardew.QuestableTractor
 {
     public class ModEntry
-        : Mod
+        : Mod, ISimpleLog
     {
         private IReadOnlyCollection<BaseQuestController> QuestControllers = null!;
         private LoaderQuestController loaderQuestController = null!;
@@ -51,14 +51,17 @@ namespace NermNermNerm.Stardew.QuestableTractor
             this.Helper.Events.GameLoop.DayEnding += this.OnDayEnding;
         }
 
-        public void LogError(string message)
-            => this.Monitor.Log(message, LogLevel.Error);
-
-        public void LogWarning(string message)
-            => this.Monitor.Log(message, LogLevel.Warn);
-
-        public void LogVerbose(string message)
-            => this.Monitor.Log(message, LogLevel.Warn);
+        void ISimpleLog.WriteToLog(string message, LogLevel level, bool isOnceOnly)
+        {
+            if (isOnceOnly)
+            {
+                this.Monitor.LogOnce(message, level);
+            }
+            else
+            {
+                this.Monitor.Log(message, level);
+            }
+        }
 
         private void UpdateTractorModConfig()
         {

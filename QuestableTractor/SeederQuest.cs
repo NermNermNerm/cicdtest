@@ -52,11 +52,16 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         private const int ironBarCount = 10;
 
-        public SeederQuest()
-            : base(SeederQuestState.GotPart)
+        public SeederQuest(SeederQuestState initialState)
+            : base(initialState)
         {
             this.questTitle = "Fix the seeder";
             this.questDescription = "Turns out George had the seeder attachment, maybe he can be talked into fixing it.";
+        }
+
+        public SeederQuest()
+            : this(SeederQuestState.GotPart)
+        {
         }
 
         public void ReadyToInstall()

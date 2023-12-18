@@ -7,7 +7,17 @@ using System.Collections.Generic;
 
 namespace NermNermNerm.Stardew.QuestableTractor
 {
-    public abstract class BaseQuestController
+    /// <summary>
+    ///   This class represents aspects of the class that need monitoring whether or not the player is
+    ///   actually on the quest.  For example, if there are triggers that start the quest, the controller
+    ///   will detect them.  The controller is also the place that knows whether the quest has been
+    ///   completed or not.
+    /// </summary>
+    /// <remarks>
+    ///   Quest Controllers should be constructed when the mod is initialized (in <code>Mod.Entry</code>)
+    ///   and they are never destroyed.
+    /// </remarks>
+    public abstract class BaseQuestController : ISimpleLog
     {
         protected BaseQuestController(ModEntry mod)
         {
@@ -35,10 +45,54 @@ namespace NermNermNerm.Stardew.QuestableTractor
             Game1.DrawDialogue(new Dialogue(null, null, message));
         }
 
-        public void LogError(string message) => this.Mod.LogError(message);
-        public void LogWarning(string message) => this.Mod.LogWarning(message);
-        public void LogVerbose(string message) => this.Mod.LogVerbose(message);
+
+        private readonly Dictionary<string, Action<Item>> itemsToWatch = new();
+        private bool isWatchingInventory;
+
+        protected void MonitorInventoryForItem(string itemId, Action<Item> onItemAdded)
+        {
+            this.itemsToWatch[itemId] = onItemAdded;
+            if (!this.isWatchingInventory)
+            {
+                this.Mod.Helper.Events.Player.InventoryChanged += this.Player_InventoryChanged;
+                this.isWatchingInventory = true;
+            }
+        }
+
+        protected void StopMonitoringInventoryFor(string itemId)
+        {
+            this.itemsToWatch.Remove(itemId);
+            if (!this.itemsToWatch.Any() && this.isWatchingInventory)
+            {
+                this.Mod.Helper.Events.Player.InventoryChanged -= this.Player_InventoryChanged;
+                this.isWatchingInventory = false;
+            }
+        }
+
+
+        private void Player_InventoryChanged(object? sender, StardewModdingAPI.Events.InventoryChangedEventArgs e)
+        {
+            foreach (var item in e.Added)
+            {
+                if (this.itemsToWatch.TryGetValue(item.ItemId, out var handler))
+                {
+                    if (!e.Player.IsMainPlayer)
+                    {
+                        e.Player.holdUpItemThenMessage(item, true);
+                        Spout("This item is for unlocking the tractor - only the host can advance this quest.  Give this item to the host.");
+                    }
+                    else
+                    {
+                        handler(item);
+                    }
+                }
+            }
+        }
+
+        public virtual void WriteToLog(string message, LogLevel level, bool isOnceOnly)
+            => ((ISimpleLog)this.Mod).WriteToLog(message, level, isOnceOnly);
     }
+
 
     public abstract class BaseQuestController<TStateEnum, TQuest> : BaseQuestController
         where TStateEnum : struct, Enum
@@ -120,29 +174,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
         }
 
-        private readonly Dictionary<string, Action<Item>> itemsToWatch = new();
-        private bool isWatchingInventory;
-
-        protected void MonitorInventoryForItem(string itemId, Action<Item> onItemAdded)
-        {
-            this.itemsToWatch[itemId] = onItemAdded;
-            if (!this.isWatchingInventory)
-            {
-                this.Mod.Helper.Events.Player.InventoryChanged += this.Player_InventoryChanged;
-                this.isWatchingInventory = true;
-            }
-        }
-
-        protected void StopMonitoringInventoryFor(string itemId)
-        {
-            this.itemsToWatch.Remove(itemId);
-            if (!this.itemsToWatch.Any() && this.isWatchingInventory)
-            {
-                this.Mod.Helper.Events.Player.InventoryChanged -= this.Player_InventoryChanged;
-                this.isWatchingInventory = false;
-            }
-        }
-
         public override void OnDayStarted()
         {
             if (!Game1.player.modData.TryGetValue(this.ModDataKey, out string stateAsString))
@@ -177,25 +208,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
         /// </summary>
         protected virtual void MonitorQuestItems() { }
 
-        private void Player_InventoryChanged(object? sender, StardewModdingAPI.Events.InventoryChangedEventArgs e)
-        {
-            foreach (var item in e.Added)
-            {
-                if (this.itemsToWatch.TryGetValue(item.ItemId, out var handler))
-                {
-                    if (!e.Player.IsMainPlayer)
-                    {
-                        e.Player.holdUpItemThenMessage(item, true);
-                        Spout("This item is for unlocking the tractor - only the host can advance this quest.  Give this item to the host.");
-                    }
-                    else
-                    {
-                        handler(item);
-                    }
-                }
-            }
-        }
-
         public override void OnDayEnding()
         {
             string? questState = Game1.player.questLog.OfType<TQuest>().FirstOrDefault()?.Serialize();
@@ -205,7 +217,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
             Game1.player.questLog.RemoveWhere(q => q is TQuest);
         }
-
 
         protected void PlaceBrokenPartUnderClump(int preferredResourceClumpToHideUnder)
         {

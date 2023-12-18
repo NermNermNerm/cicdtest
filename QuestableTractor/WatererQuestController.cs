@@ -22,6 +22,11 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         public static float chanceOfCatchingQuestItem = 0;
 
+        protected override WatererQuest CreateQuest() => new WatererQuest();
+
+        protected override WatererQuest CreateQuestFromDeserializedState(WatererQuestState initialState)
+            => new WatererQuest(initialState);
+
         protected override string QuestCompleteMessage => "Awesome!  You've now got a way to water your crops with your tractor!#$b#HINT: To use it, equip the watering can while on the tractor.";
 
         protected override string ModDataKey => ModDataKeys.WateringQuestStatus;

@@ -7,7 +7,7 @@ using StardewValley.Quests;
 namespace NermNermNerm.Stardew.QuestableTractor
 {
 
-    public abstract class BaseQuest<TStateEnum> : Quest
+    public abstract class BaseQuest<TStateEnum> : Quest, ISimpleLog
         where TStateEnum : struct, Enum
     {
         private TStateEnum state;
@@ -189,5 +189,8 @@ namespace NermNermNerm.Stardew.QuestableTractor
         }
 
         public virtual void AdvanceStateForDayPassing() {}
+
+        public virtual void WriteToLog(string message, StardewModdingAPI.LogLevel level, bool isOnceOnly)
+            => this.Controller.WriteToLog(message, level, isOnceOnly);
     }
 }

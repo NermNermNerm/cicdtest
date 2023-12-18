@@ -110,7 +110,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
             else
             {
-                this.mod.Monitor.Log($"It looks like TractorMod is not loaded - {GarageBuildingId} does not exist", LogLevel.Error);
+                this.mod.LogError($"It looks like TractorMod is not loaded - {GarageBuildingId} does not exist");
             }
         }
     }

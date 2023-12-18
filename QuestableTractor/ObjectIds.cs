@@ -30,7 +30,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
                     Name = id,
                     DisplayName = displayName,
                     Description = description,
-                    Type = "Litter",
+                    Type = "Quest",
                     Category = -999,
                     Price = 0,
                     Texture = ModEntry.SpritesPseudoPath,

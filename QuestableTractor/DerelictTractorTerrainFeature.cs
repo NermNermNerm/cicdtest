@@ -30,17 +30,18 @@ namespace NermNermNerm.Stardew.QuestableTractor
             {
                 if (positionAsString is not null)
                 {
-                    mod.Monitor.Log($"Invalid value for {ModDataKeys.DerelictPosition}: {positionAsString} -- finding a new position", LogLevel.Error);
+                    mod.LogError($"Invalid value for {ModDataKeys.DerelictPosition}: {positionAsString} -- finding a new position");
                 }
 
                 position = GetClearSpotForTractor(mod);
                 if (position == new Vector2())
                 {
                     // Hope for better luck tomorrow
-                    mod.Monitor.Log("No clear spot could be found to place the derelict tractor.", LogLevel.Error);
+                    mod.LogError("No clear spot could be found to place the derelict tractor.");
                     return;
                 }
 
+                mod.LogInfo($"Derelict tractor placed at {position}");
                 Game1.player.modData[ModDataKeys.DerelictPosition] = FormattableString.Invariant($"{position.X},{position.Y}");
             }
             Place(mod, position);

@@ -1,4 +1,5 @@
 using System.Linq;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Xna.Framework;
 using StardewValley;
 using StardewValley.GameData.GarbageCans;
@@ -155,7 +156,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             var mines = Game1.locations.FirstOrDefault(l => l.Name == "Mine");
             if (mines is null)
             {
-                this.Controller.LogWarning("Couldn't find the Mine?!");
+                this.LogWarning("Couldn't find the Mine?!");
                 return;
             }
 
@@ -165,16 +166,24 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 var o = ItemRegistry.Create<StardewValley.Object>(ObjectIds.AlexesOldShoe);
                 o.Location = mines;
                 o.TileLocation = placeInMineForShoes;
-                this.Controller.LogVerbose($"{ObjectIds.AlexesOldShoe} placed at {placeInMineForShoes.X},{placeInMineForShoes.Y}");
+                this.LogInfo($"{ObjectIds.AlexesOldShoe} placed at {placeInMineForShoes.X},{placeInMineForShoes.Y}");
                 o.IsSpawnedObject = true;
                 mines.objects[o.TileLocation] = o;
             }
         }
 
-        static internal void RemoveShoesNearDwarf()
+        private void RemoveShoesNearDwarf()
         {
             var mines = Game1.locations.FirstOrDefault(l => l.Name == "Mine");
-            mines?.removeObject(placeInMineForShoes, showDestroyedObject: false);
+            var removedShoes = mines?.removeObject(placeInMineForShoes, showDestroyedObject: false);
+            if (removedShoes is not null)
+            {
+                this.LogTrace("Shoes removed");
+            }
+            else
+            {
+                this.LogTrace("No shoes near dwarf to remove");
+            }
         }
 
         private void InvalidateGarbageCanData()
@@ -186,6 +195,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
         {
             if (this.State >= LoaderQuestState.FindSomeShoes && this.State < LoaderQuestState.DisguiseTheShoes)
             {
+                this.LogTrace("Added shoes to trashcan loot table");
                 gcd.GarbageCans["Evelyn"].Items.Add(new GarbageCanItemData()
                 {
                     ItemId = ObjectIds.AlexesOldShoe,
@@ -193,6 +203,10 @@ namespace NermNermNerm.Stardew.QuestableTractor
                     Condition = "RANDOM 0.3 @addDailyLuck",
                     Id = "QuestableTractor.AlexesOldShoe",
                 });
+            }
+            else
+            {
+                this.LogTrace("Left Evelyn's garbage can alone");
             }
         }
 
@@ -212,7 +226,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
 
             this.InvalidateGarbageCanData();
-            RemoveShoesNearDwarf();
+            this.RemoveShoesNearDwarf();
         }
 
         internal void OnPlayerGotDisguisedShoes(Item dyedShoes)

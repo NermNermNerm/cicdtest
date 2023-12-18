@@ -42,7 +42,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             var quest = Game1.player.questLog.OfType<LoaderQuest>().FirstOrDefault();
             if (quest is null)
             {
-                this.Mod.Monitor.Log($"Player found {oldShoes.ItemId} when the Loader quest was not active?!", LogLevel.Warn);
+                this.LogWarning($"Player found {oldShoes.ItemId} when the Loader quest was not active");
             }
             else
             {
@@ -56,7 +56,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             var quest = this.GetQuest();
             if (quest is null)
             {
-                this.Mod.Monitor.Log($"Player found {dyedShoes.ItemId}, when the quest was not active?!", LogLevel.Warn);
+                this.LogWarning($"Player found {dyedShoes.ItemId}, when the quest was not active");
             }
             else
             {

@@ -180,7 +180,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             {
                 if (statusAsString is not null)
                 {
-                    mod.Monitor.Log($"Invalid value for {ModDataKeys.MainQuestStatus}: {statusAsString} -- reverting to NotStarted", LogLevel.Error);
+                    mod.LogError($"Invalid value for {ModDataKeys.MainQuestStatus}: {statusAsString} -- reverting to NotStarted");
                 }
                 mainQuestStatusAtDayStart = RestorationState.NotStarted;
             }
@@ -196,7 +196,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 if (garage is null || garage.isUnderConstruction())
                 {
                     // Could happen I suppose if the user deleted the garage while on the quest.  They can fix it themselves by rebuilding the garage...
-                    mod.Monitor.Log($"Tractor main quest state is {mainQuestStatus} but there's no garage??", LogLevel.Error);
+                    mod.LogError($"Tractor main quest state is {mainQuestStatus} but there's no garage??");
                 }
                 else
                 {
