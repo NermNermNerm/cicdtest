@@ -80,6 +80,9 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 return;
             }
 
+            bool IsPlayerInGarage(Character c, Stable b)
+                => b.intersects(new Rectangle(new Point((int)c.Position.X, (int)c.Position.Y - 128), new Point(64, 128)));
+
             var itemInHand = Game1.player?.CurrentItem;
             if (Game1.player is not null && Game1.player.currentLocation is not null && itemInHand is not null && Game1.player.currentLocation == Game1.getFarm()
                 && Game1.player.currentLocation.buildings
@@ -87,16 +90,15 @@ namespace NermNermNerm.Stardew.QuestableTractor
                     .Where(s => s.buildingType.Value == TractorModConfig.GarageBuildingId)
                     .Any(s => IsPlayerInGarage(Game1.player, s)))
             {
-                foreach (var qc in this.QuestControllers.Where(qc => qc.WorkingAttachmentPartId == itemInHand.ItemId))
+                foreach (var qc in this.QuestControllers)
                 {
-                    qc.WorkingAttachmentBroughtToGarage();
-                    this.UpdateTractorModConfig();
+                    if (qc.PlayerIsInGarage(itemInHand))
+                    {
+                        this.UpdateTractorModConfig();
+                    }
                 }
             }
         }
-
-        private static bool IsPlayerInGarage(Character c, Stable b)
-            => b.intersects(new Rectangle(new Point((int)c.Position.X, (int)c.Position.Y-128), new Point(64, 128)));
 
         [EventPriority(EventPriority.Low)] // Causes our OnDayStarted to come after TractorMod's, which does not set EventPriority
         public void OnDayStarted(object? sender, DayStartedEventArgs e)
@@ -138,7 +140,9 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
             else
             {
-                string[] possibleHintTopics = this.QuestControllers.Where(qc => !qc.IsStarted).Select(qc => qc.HintTopicConversationKey).ToArray();
+                string[] possibleHintTopics = this.QuestControllers
+                    .Where(qc => !qc.IsStarted && qc.HintTopicConversationKey is not null)
+                    .Select(qc => qc.HintTopicConversationKey!).ToArray();
                 if (possibleHintTopics.Any())
                 {
                     Game1.player.activeDialogueEvents.Add(possibleHintTopics[Game1.random.Next(possibleHintTopics.Length)], 4);

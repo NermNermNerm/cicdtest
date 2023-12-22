@@ -4,7 +4,7 @@ using StardewValley.TerrainFeatures;
 
 namespace NermNermNerm.Stardew.QuestableTractor
 {
-    public class ScytheQuestController : BaseQuestController<ScytheQuestState, ScytheQuest>
+    public class ScytheQuestController : TractorPartQuestController<ScytheQuestState, ScytheQuest>
     {
         public ScytheQuestController(ModEntry mod) : base(mod) { }
 

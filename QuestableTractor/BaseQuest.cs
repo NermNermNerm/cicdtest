@@ -77,7 +77,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 return false;
             }
 
-            if (item is not null && !this.IsItemForThisQuest(item))
+            if (item is not null && !this.Controller.IsItemForThisQuest(item))
             {
                 return false;
             }
@@ -95,8 +95,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 Game1.playSound("questcomplete"); // Note documentation suggests its for quest complete and "journal update".  That's what we are using it for.
             }
         }
-
-        protected virtual bool IsItemForThisQuest(Item item) => item?.ItemId == this.Controller.BrokenAttachmentPartId;
 
         protected abstract void SetObjective();
 

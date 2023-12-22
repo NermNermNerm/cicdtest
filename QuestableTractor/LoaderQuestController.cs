@@ -9,8 +9,14 @@ using StardewValley.TerrainFeatures;
 
 namespace NermNermNerm.Stardew.QuestableTractor
 {
+
+    // Find a place to put this on day start when quest is not active
+    //this.HideStarterItemIfNeeded();
+    //this.MonitorInventoryForItem(this.BrokenAttachmentPartId, this.PlayerGotBrokenPart);
+
+
     internal class LoaderQuestController
-        : BaseQuestController<LoaderQuestState, LoaderQuest>
+        : TractorPartQuestController<LoaderQuestState, LoaderQuest>
     {
         public LoaderQuestController(ModEntry mod) : base(mod) { }
 

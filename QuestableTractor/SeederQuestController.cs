@@ -3,7 +3,7 @@ using StardewValley;
 namespace NermNermNerm.Stardew.QuestableTractor
 {
     internal class SeederQuestController
-        : BaseQuestController<SeederQuestState, SeederQuest>
+        : TractorPartQuestController<SeederQuestState, SeederQuest>
     {
         public SeederQuestController(ModEntry mod) : base(mod) { }
 

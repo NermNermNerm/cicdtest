@@ -9,7 +9,7 @@ using StardewValley.GameData.Tools;
 namespace NermNermNerm.Stardew.QuestableTractor
 {
     public class WatererQuestController
-        : BaseQuestController<WatererQuestState, WatererQuest>
+        : TractorPartQuestController<WatererQuestState, WatererQuest>
     {
         public static bool hasPatchBeenInstalled = false;
 
@@ -48,37 +48,27 @@ namespace NermNermNerm.Stardew.QuestableTractor
             chanceOfCatchingQuestItem = 0;
         }
 
-        public override void OnDayStarted()
+        protected override void HideStarterItemIfNeeded()
         {
-            if (this.IsStarted)
+            if (RestoreTractorQuest.IsTractorUnlocked)
             {
-                chanceOfCatchingQuestItem = 0; // No chance - already pulled it up.
-                // the docs for Harmony.Unpatch make it seem like a dangerous thing to do,
-                // so we'll leave the patch on even when we know it's useless.
+                chanceOfCatchingQuestItem = 0.01f + Game1.Date.TotalDays / 200f;
             }
             else
             {
-                if (RestoreTractorQuest.IsTractorUnlocked)
-                {
-                    chanceOfCatchingQuestItem = 0.01f + Game1.Date.TotalDays / 200f;
-                }
-                else
-                {
-                    chanceOfCatchingQuestItem = .01f;
-                }
-
-                if (!hasPatchBeenInstalled)
-                {
-                    // Undoing a Harmony patch is sketchy, so we're going to go ahead and install our patch even if the quest is irrelevant.
-                    // It might be wiser to not do it until we know the quest hasn't been started
-                    var farmType = typeof(Farm);
-                    var getFishMethod = farmType.GetMethod("getFish");
-                    WatererQuestController.instance = this; // Harmony doesn't support creating prefixes with instance methods...  Faking it.
-                    this.Mod.Harmony.Patch(getFishMethod, prefix: new HarmonyMethod(typeof(WatererQuestController), nameof(Prefix_GetFish)));
-                    hasPatchBeenInstalled = true;
-                }
+                chanceOfCatchingQuestItem = .01f;
             }
-            base.OnDayStarted();
+
+            if (!hasPatchBeenInstalled)
+            {
+                // Undoing a Harmony patch is sketchy, so we're going to go ahead and install our patch even if the quest is irrelevant.
+                // It might be wiser to not do it until we know the quest hasn't been started
+                var farmType = typeof(Farm);
+                var getFishMethod = farmType.GetMethod("getFish");
+                WatererQuestController.instance = this; // Harmony doesn't support creating prefixes with instance methods...  Faking it.
+                this.Mod.Harmony.Patch(getFishMethod, prefix: new HarmonyMethod(typeof(WatererQuestController), nameof(Prefix_GetFish)));
+                hasPatchBeenInstalled = true;
+            }
         }
 
         private static WatererQuestController instance = null!;

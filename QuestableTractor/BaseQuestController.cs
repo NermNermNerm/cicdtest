@@ -31,22 +31,27 @@ namespace NermNermNerm.Stardew.QuestableTractor
         public abstract void OnDayStarted();
         public abstract void OnDayEnding();
 
-        protected abstract string ModDataKey { get; }
-        public abstract string WorkingAttachmentPartId { get; }
-        public abstract string BrokenAttachmentPartId { get; }
-        public abstract string HintTopicConversationKey { get; }
-        public bool IsStarted => Game1.player.modData.ContainsKey(this.ModDataKey);
-        public bool IsComplete => Game1.player.modData.TryGetValue(this.ModDataKey, out string value) && value == QuestCompleteStateMagicWord;
+        protected virtual string? ModDataKey { get; } = null;
 
-        public abstract void WorkingAttachmentBroughtToGarage();
+        public virtual bool IsStarted => Game1.MasterPlayer.modData.ContainsKey(this.ModDataKey);
+        public virtual bool IsComplete => Game1.MasterPlayer.modData.TryGetValue(this.ModDataKey, out string value) && value == QuestCompleteStateMagicWord;
 
         public static void Spout(string message)
         {
             Game1.DrawDialogue(new Dialogue(null, null, message));
         }
 
+        public abstract bool IsItemForThisQuest(Item item);
+
+        /// <summary>
+        ///   Conversation keys are managed mod-wide, as there's a complex interplay, where
+        ///   the main-quest conversation key is thrown up until that one gets started,
+        ///   and then the part quest hints get dribbled out later.
+        /// </summary>
+        public virtual string? HintTopicConversationKey { get; } = null;
 
         private readonly Dictionary<string, Action<Item>> itemsToWatch = new();
+
         private bool isWatchingInventory;
 
         protected void MonitorInventoryForItem(string itemId, Action<Item> onItemAdded)
@@ -89,6 +94,13 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
         }
 
+        /// <summary>
+        ///   This is a hacky way to deal with quest completion until something more clever can be thought up.
+        ///   Right now this gets called in the 1-second-tick callback.  It returns true if the item resulted
+        ///   in quest completion and the tractor config should be rebuilt.
+        /// </summary>
+        public virtual bool PlayerIsInGarage(Item itemInHand) { return false; }
+
         public virtual void WriteToLog(string message, LogLevel level, bool isOnceOnly)
             => ((ISimpleLog)this.Mod).WriteToLog(message, level, isOnceOnly);
     }
@@ -100,106 +112,101 @@ namespace NermNermNerm.Stardew.QuestableTractor
     {
         protected BaseQuestController(ModEntry mod) : base(mod) { }
 
-        public virtual void AnnounceGotBrokenPart(Item brokenPart)
+        protected virtual TQuest CreateQuestFromDeserializedState(TStateEnum initialState)
         {
-            Game1.player.holdUpItemThenMessage(brokenPart);
+            throw new Exception("Implementations of BaseQuestController must override either CreateQuestFromDeserializedState and ModDataKey or Deserialize");
         }
 
-        /// <summary>
-        ///  Called when the main player gets the starter item for the quest.  Implmenetations should disable spawning any more quest starter items.
-        /// </summary>
-        protected virtual void OnQuestStarted() { }
-
-        protected abstract TQuest CreateQuestFromDeserializedState(TStateEnum initialState);
         protected abstract TQuest CreateQuest();
 
         public TQuest? GetQuest() => Game1.player.questLog.OfType<TQuest>().FirstOrDefault();
 
-        internal void PlayerGotBrokenPart(Item brokenPart)
-        {
-            if (Game1.player.questLog.OfType<TQuest>().Any())
-            {
-                this.LogWarning($"Player found a broken attachment, {brokenPart.ItemId}, when the quest was active?!");
-                return;
-            }
-
-            this.AnnounceGotBrokenPart(brokenPart);
-            var quest = this.CreateQuest();
-            Game1.player.questLog.Add(quest);
-            this.OnQuestStarted();
-            this.MonitorInventoryForItem(this.WorkingAttachmentPartId, this.PlayerGotWorkingPart);
-            this.StopMonitoringInventoryFor(this.BrokenAttachmentPartId);
-        }
-
-        public void PlayerGotWorkingPart(Item workingPart)
-        {
-            var quest = Game1.player.questLog.OfType<TQuest>().FirstOrDefault();
-            if (quest is null)
-            {
-                this.LogWarning($"Player found a working attachment, {workingPart.ItemId}, when the quest was not active?!");
-                // consider recovering by creating the quest?
-                return;
-            }
-
-            quest.GotWorkingPart(workingPart);
-            this.StopMonitoringInventoryFor(this.WorkingAttachmentPartId);
-        }
-
-        public override void WorkingAttachmentBroughtToGarage()
-        {
-            var activeQuest = Game1.player.questLog.OfType<TQuest>().FirstOrDefault();
-            activeQuest?.questComplete();
-            if (activeQuest is null)
-            {
-                this.LogWarning($"An active {nameof(TQuest)} should exist, but doesn't?!");
-            }
-            Game1.player.modData[this.ModDataKey] = QuestCompleteStateMagicWord;
-            Game1.player.removeFirstOfThisItemFromInventory(this.WorkingAttachmentPartId);
-            Game1.DrawDialogue(new Dialogue(null, null, this.QuestCompleteMessage));
-        }
-
         protected abstract string QuestCompleteMessage { get; }
-        protected virtual void HideStarterItemIfNeeded() { }
 
-        protected virtual TQuest? Deserialize(string storedValue)
+        protected enum QuestState
+        {
+            NotStarted,
+            InProgress,
+            Completed,
+        };
+
+        protected virtual QuestState Deserialize(out TQuest? quest)
+        {
+            if (this.ModDataKey is null)
+            {
+                throw new Exception("Subclasses of BaseQuestController should either set ModDataKey or override Deserialize");
+            }
+
+            if (!Game1.player.modData.TryGetValue(this.ModDataKey, out string storedValue))
+            {
+                quest = null;
+                return QuestState.NotStarted;
+            }
+
+            if (storedValue == QuestCompleteStateMagicWord)
+            {
+                quest = null;
+                return QuestState.Completed;
+            }
+
+            return this.DeserializeSingleKey(storedValue, out quest);
+        }
+
+        protected virtual QuestState DeserializeSingleKey(string storedValue, out TQuest? quest)
         {
             if (!Enum.TryParse(storedValue, out TStateEnum parsedValue))
             {
                 this.LogError($"Invalid value for moddata key, '{this.ModDataKey}': '{storedValue}' - quest state will revert to not started.");
-                return null;
+                quest = null;
+                return QuestState.Completed;
+            }
+
+            quest = this.CreateQuestFromDeserializedState(parsedValue);
+            return QuestState.InProgress;
+        }
+
+        protected virtual void OnDayStartedQuestNotStarted()
+        {
+            if (this.HintTopicConversationKey is not null)
+            {
+                // Our stuff recurs every week for 4 days out of the week.  Delay until after the
+                // first week so that the introductions quest runs to completion.  Perhaps it
+                // would be better to delay until all the villagers we care about have been greeted.
+                if (Game1.Date.DayOfWeek == DayOfWeek.Sunday)
+                {
+                    // TODO: Drop hint
+                }
+            }
+
+            // 
+            // implementations should hide the quest starter
+        }
+
+        protected virtual void OnDayStartedQuestInProgress(TQuest quest)
+        {
+            quest.AdvanceStateForDayPassing();
+        }
+
+        protected virtual void OnDayStartedQuestComplete()
+        {
+        }
+
+        public sealed override void OnDayStarted()
+        {
+            var state = this.Deserialize(out var newQuest);
+            if (newQuest is not null)
+            {
+                newQuest.MarkAsViewed();
+                newQuest.MakeSoundOnAdvancement = true;
+                Game1.player.questLog.Add(newQuest);
+            }
+            else if (state == QuestState.NotStarted)
+            {
+                this.OnDayStartedQuestNotStarted();
             }
             else
             {
-                return this.CreateQuestFromDeserializedState(parsedValue);
-            }
-        }
-
-        public override void OnDayStarted()
-        {
-            if (!Game1.player.modData.TryGetValue(this.ModDataKey, out string stateAsString))
-            {
-                // Quest is not started.
-                this.HideStarterItemIfNeeded();
-                this.MonitorInventoryForItem(this.BrokenAttachmentPartId, this.PlayerGotBrokenPart);
-            }
-            else if (stateAsString != QuestCompleteStateMagicWord)
-            {
-                var newQuest = this.Deserialize(stateAsString);
-                if (newQuest is null)
-                {
-                    // Try to recover from the fault by blowing away the data.  This means that the
-                    // next day, we'll hit the item-re-plant logic.
-                    Game1.player.modData.Remove(this.ModDataKey);
-                }
-                else
-                {
-                    newQuest.MarkAsViewed();
-                    newQuest.AdvanceStateForDayPassing();
-                    newQuest.MakeSoundOnAdvancement = true;
-                    Game1.player.questLog.Add(newQuest);
-                    this.MonitorInventoryForItem(this.WorkingAttachmentPartId, this.PlayerGotWorkingPart);
-                    this.MonitorQuestItems();
-                }
+                this.OnDayStartedQuestComplete();
             }
         }
 
@@ -210,67 +217,22 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         public override void OnDayEnding()
         {
-            string? questState = Game1.player.questLog.OfType<TQuest>().FirstOrDefault()?.Serialize();
-            if (questState is not null)
+            var quest = Game1.player.questLog.OfType<TQuest>().FirstOrDefault();
+            if (quest is not null)
             {
-                Game1.player.modData[this.ModDataKey] = questState;
-            }
-            Game1.player.questLog.RemoveWhere(q => q is TQuest);
-        }
-
-        protected void PlaceBrokenPartUnderClump(int preferredResourceClumpToHideUnder)
-        {
-            var farm = Game1.getFarm();
-            var existing = farm.objects.Values.FirstOrDefault(o => o.ItemId == this.BrokenAttachmentPartId);
-            if (existing is not null)
-            {
-                this.Mod.Monitor.VerboseLog($"{this.BrokenAttachmentPartId} is already placed at {existing.TileLocation.X},{existing.TileLocation.Y}");
-                return;
-            }
-
-            var position = this.FindPlaceToPutItem(preferredResourceClumpToHideUnder);
-            if (position != default)
-            {
-                var o = ItemRegistry.Create<StardewValley.Object>(this.BrokenAttachmentPartId);
-                o.Location = Game1.getFarm();
-                o.TileLocation = position;
-                this.Mod.Monitor.VerboseLog($"{this.BrokenAttachmentPartId} placed at {position.X},{position.Y}");
-                o.IsSpawnedObject = true;
-                farm.objects[o.TileLocation] = o;
+                this.SaveQuestAtEndOfDay(quest);
+                Game1.player.questLog.RemoveWhere(q => q is TQuest);
             }
         }
 
-        private Vector2 FindPlaceToPutItem(int preferredResourceClumpToHideUnder)
+        public virtual void SaveQuestAtEndOfDay(TQuest quest)
         {
-            var farm = Game1.getFarm();
-            var bottomMostResourceClump = farm.resourceClumps.Where(tf => tf.parentSheetIndex.Value == preferredResourceClumpToHideUnder).OrderByDescending(tf => tf.Tile.Y).FirstOrDefault();
-            if (bottomMostResourceClump is not null)
+            if (this.ModDataKey is null)
             {
-                return bottomMostResourceClump.Tile;
+                throw new Exception("If ModDataKey is not supplied, SaveQuestAtEndOfDay should be overridden");
             }
 
-            this.LogWarning($"Couldn't find the preferred location ({preferredResourceClumpToHideUnder}) for the {this.BrokenAttachmentPartId}");
-            bottomMostResourceClump = farm.resourceClumps.OrderByDescending(tf => tf.Tile.Y).FirstOrDefault();
-            if (bottomMostResourceClump is not null)
-            {
-                return bottomMostResourceClump.Tile;
-            }
-
-            this.LogWarning($"The farm contains no resource clumps under which to stick the {this.BrokenAttachmentPartId}");
-
-            // We're probably dealing with an old save,  Try looking for any clear space.
-            //  This technique is kinda dumb, but whatev's.  This mod is pointless on a fully-developed farm.
-            for (int i = 0; i < 1000; ++i)
-            {
-                Vector2 positionToCheck = new Vector2(Game1.random.Next(farm.map.DisplayWidth / 64), Game1.random.Next(farm.map.DisplayHeight / 64));
-                if (farm.CanItemBePlacedHere(positionToCheck))
-                {
-                    return positionToCheck;
-                }
-            }
-
-            this.LogError($"Couldn't find any place at all to put the {this.BrokenAttachmentPartId}");
-            return default;
+            Game1.player.modData[this.ModDataKey] = quest.Serialize();
         }
     }
 }
