@@ -18,7 +18,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
         {
             this.questTitle = "Fix the loader";
             this.questDescription = "I found the front end loader attachment for the tractor, but it's all bent up and rusted through in spots.";
-            this.SetObjective();
         }
 
         protected override void SetObjective()

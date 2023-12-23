@@ -12,7 +12,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
         {
             this.questTitle = "Fix the harvester";
             this.questDescription = "I found the harvester attachment for the tractor, but won't work like it is now.  I should ask around town about it.";
-            this.SetObjective();
         }
 
         public override void GotWorkingPart(Item workingPart)
@@ -125,7 +124,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
             {
                 this.Spout(n, "The Greeble machine!$h#$b#Jaz and I used to play games with that, but we had to stop because Marnie told us we couldn't go into your pasture anymore unless you invite us.#$b#There are parts missing?  Sure there are!  Me and Jaz took a couple of pieces.  I used mine in a trap I was building to trap the Greebles under my bed!  It didn't work.  Hey, have you got any good bugs on your farm?  I'll find it for you if you can bring me some really big crawly ones!$h");
                 this.State = this.State with { VincentTradeKnown = true };
-                this.SetObjective();
             }
             // else this.Spout(n, "What is that thing?  A harvester?  Sure, if you say so...$s");
         }

@@ -17,7 +17,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
         {
             this.questTitle = "Investigate the tractor";
             this.questDescription = "There's a rusty old tractor in the fields; it sure would be nice if it could be restored.  Perhaps the townspeople can help.";
-            this.SetObjective();
         }
 
         protected override void SetObjective()

@@ -11,6 +11,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
         protected BaseQuest(BaseQuestController controller)
         {
             this.Controller = controller;
+            this.SetObjective();
         }
 
         public string RawState
@@ -180,14 +181,14 @@ namespace NermNermNerm.Stardew.QuestableTractor
             => this.Controller.WriteToLog(message, level, isOnceOnly);
     }
 
-    public abstract class BaseQuest<TStateEnum> : BaseQuest
-        where TStateEnum : struct
+    public abstract class BaseQuest<TState> : BaseQuest
+        where TState : struct
     {
-        public BaseQuest(BaseQuestController<TStateEnum> controller) : base(controller) { }
+        public BaseQuest(BaseQuestController<TState> controller) : base(controller) { }
 
-        public new BaseQuestController<TStateEnum> Controller => (BaseQuestController<TStateEnum>)base.Controller;
+        public new BaseQuestController<TState> Controller => (BaseQuestController<TState>)base.Controller;
 
-        public TStateEnum State
+        public TState State
         {
             get => this.Controller.State;
             set

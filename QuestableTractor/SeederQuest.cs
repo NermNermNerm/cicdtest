@@ -62,7 +62,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
         public void ReadyToInstall()
         {
             this.State = SeederQuestState.InstallPart;
-            this.SetObjective();
         }
 
         public override void CheckIfComplete(NPC n, Item? item)
