@@ -9,7 +9,7 @@ using StardewValley.GameData.Tools;
 namespace NermNermNerm.Stardew.QuestableTractor
 {
     public class WatererQuestController
-        : TractorPartQuestController<WatererQuestState, WatererQuest>
+        : TractorPartQuestController<WatererQuestState>
     {
         public static bool hasPatchBeenInstalled = false;
 
@@ -22,10 +22,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         public static float chanceOfCatchingQuestItem = 0;
 
-        protected override WatererQuest CreateQuest() => new WatererQuest();
-
-        protected override WatererQuest CreateQuestFromDeserializedState(WatererQuestState initialState)
-            => new WatererQuest(initialState);
+        protected override WatererQuest CreateQuest() => new WatererQuest(this);
 
         protected override string QuestCompleteMessage => "Awesome!  You've now got a way to water your crops with your tractor!#$b#HINT: To use it, equip the watering can while on the tractor.";
 
@@ -43,14 +40,15 @@ namespace NermNermNerm.Stardew.QuestableTractor
             Spout("Whoah that was heavy!  Looks like an irrigator attachment for a tractor under all that mud!");
         }
 
-        protected override void OnQuestStarted()
+        protected override void MonitorQuestItems()
         {
             chanceOfCatchingQuestItem = 0;
+            base.MonitorQuestItems();
         }
 
         protected override void HideStarterItemIfNeeded()
         {
-            if (RestoreTractorQuest.IsTractorUnlocked)
+            if (this.Mod.RestoreTractorQuestController.IsComplete)
             {
                 chanceOfCatchingQuestItem = 0.01f + Game1.Date.TotalDays / 200f;
             }
@@ -129,12 +127,25 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
             else if (Game1.random.NextDouble() < chanceOfCatchingQuestItem)
             {
-                BorrowHarpoonQuest.StartQuest();
+                this.Mod.BorrowHarpoonQuestController.StartQuest();
                 return ItemRegistry.Create(TrashItemId);
             }
             else
             {
                 return null;
+            }
+        }
+
+        protected override WatererQuestState AdvanceStateForDayPassing(WatererQuestState oldState)
+        {
+            if (oldState == WatererQuestState.WaitForMaruDay1)
+            {
+                Game1.player.mailForTomorrow.Add(MailKeys.WatererRepaired);
+                return WatererQuestState.WaitForMaruDay2;
+            }
+            else
+            {
+                return oldState;
             }
         }
 

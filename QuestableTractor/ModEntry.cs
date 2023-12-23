@@ -8,7 +8,6 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Buildings;
-using StardewValley.GameData.Buildings;
 using StardewValley.GameData.GarbageCans;
 using StardewValley.GameData.Objects;
 using StardewValley.GameData.Tools;
@@ -23,6 +22,11 @@ namespace NermNermNerm.Stardew.QuestableTractor
         private ScytheQuestController scytheQuestController = null!;
         private SeederQuestController seederQuestController = null!;
         private WatererQuestController watererQuestController = null!;
+        private BorrowHarpoonQuestController borrowHarpoonQuestController = null!;
+        private RestoreTractorQuestController restoreTractorQuestController = null!;
+
+        public BorrowHarpoonQuestController BorrowHarpoonQuestController => this.borrowHarpoonQuestController;
+        public RestoreTractorQuestController RestoreTractorQuestController => this.restoreTractorQuestController;
 
         public const string SpritesPseudoPath = "Mods/NermNermNerm/QuestableTractor/Sprites";
 
@@ -42,7 +46,9 @@ namespace NermNermNerm.Stardew.QuestableTractor
             this.scytheQuestController = new ScytheQuestController(this);
             this.seederQuestController = new SeederQuestController(this);
             this.watererQuestController = new WatererQuestController(this);
-            this.QuestControllers = new List<BaseQuestController> { this.loaderQuestController, this.scytheQuestController, this.seederQuestController, this.watererQuestController };
+            this.borrowHarpoonQuestController = new BorrowHarpoonQuestController(this);
+            this.restoreTractorQuestController = new RestoreTractorQuestController(this);
+            this.QuestControllers = new List<BaseQuestController> { this.loaderQuestController, this.scytheQuestController, this.seederQuestController, this.watererQuestController, this.borrowHarpoonQuestController, this.restoreTractorQuestController };
 
             this.Helper.Events.Content.AssetRequested += this.OnAssetRequested;
             this.Helper.Events.GameLoop.OneSecondUpdateTicked += this.GameLoop_OneSecondUpdateTicked;
@@ -113,8 +119,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 qc.OnDayStarted();
             }
 
-            RestoreTractorQuest.OnDayStarted(this);
-            BorrowHarpoonQuest.OnDayStarted(this);
             this.SetupMissingPartConversations();
             this.TractorModConfig.OnDayStarted();
         }
@@ -134,7 +138,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             // word to get around...  Although there might be some awkward dialogs with
             // townspeople directly involved in the quest.
 
-            if (!RestoreTractorQuest.IsStarted)
+            if (!this.restoreTractorQuestController.IsStarted)
             {
                 Game1.player.activeDialogueEvents.Add(ConversationKeys.TractorNotFound, 4);
             }
@@ -159,25 +163,10 @@ namespace NermNermNerm.Stardew.QuestableTractor
         {
             Game1.getFarm().terrainFeatures.RemoveWhere(p => p.Value is DerelictTractorTerrainFeature);
 
-            string? questState = Game1.player.questLog.OfType<RestoreTractorQuest>().FirstOrDefault()?.Serialize();
-            if (questState is not null)
-            {
-                Game1.player.modData[ModDataKeys.MainQuestStatus] = questState;
-            }
-            Game1.player.questLog.RemoveWhere(q => q is RestoreTractorQuest);
-
             foreach (var qc in this.QuestControllers)
             {
                 qc.OnDayEnding();
             }
-
-            BorrowHarpoonQuest.OnDayEnding();
-        }
-
-        public static T GetModConfig<T>(string key)
-            where T: struct // <-- see how Enum.TryParse<T> is declared for evidence that's the best you can do.
-        {
-            return (Game1.player.modData.TryGetValue(key, out string value) && Enum.TryParse(value, out T result)) ? result : default(T);
         }
 
         internal void OnAssetRequested(object? _, AssetRequestedEventArgs e)

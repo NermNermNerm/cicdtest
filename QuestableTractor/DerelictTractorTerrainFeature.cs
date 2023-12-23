@@ -15,12 +15,14 @@ namespace NermNermNerm.Stardew.QuestableTractor
     {
         private readonly Texture2D texture;
         private readonly Vector2 tile;
+        private readonly ModEntry mod;
 
-        public DerelictTractorTerrainFeature(Texture2D texture, Vector2 tile)
+        public DerelictTractorTerrainFeature(ModEntry mod, Texture2D texture, Vector2 tile)
             : base(needsTick: false)
         {
             this.texture = texture;
             this.tile = tile;
+            this.mod = mod;
         }
 
         public static void PlaceInField(ModEntry mod)
@@ -116,7 +118,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
         {
             var derelictTractorTexture = mod.Helper.ModContent.Load<Texture2D>("assets/rustyTractor.png");
 
-            var tf = new DerelictTractorTerrainFeature(derelictTractorTexture, position);
+            var tf = new DerelictTractorTerrainFeature(mod, derelictTractorTexture, position);
 
             Game1.getFarm().removeObject(position, showDestroyedObject: false);
             Game1.getFarm().removeObject(position + new Vector2(1, 0), showDestroyedObject: false);
@@ -158,8 +160,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             if (!Game1.player.questLog.Any(q => q is RestoreTractorQuest))
             {
                 Game1.drawObjectDialogue("This looks like an old tractor.  Perhaps it could help you out around the farm, but it's been out in the weather a long time.  It'll need some fixing.  Maybe somebody in town can help?");
-                var q = new RestoreTractorQuest();
-                Game1.player.questLog.Add(q);
+                this.mod.RestoreTractorQuestController.CreateQuestNew();
             }
 
             return base.performToolAction(t, damage, tileLocation);

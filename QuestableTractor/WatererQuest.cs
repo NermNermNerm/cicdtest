@@ -9,14 +9,8 @@ namespace NermNermNerm.Stardew.QuestableTractor
     {
         private const int goldBarCount = 10;
 
-        public WatererQuest()
-            : this(WatererQuestState.NoCluesYet)
-        {
-            this.showNew.Value = true;
-        }
-
-        public WatererQuest(WatererQuestState questState)
-            : base(questState)
+        public WatererQuest(WatererQuestController controller)
+            : base(controller)
         {
             this.questTitle = "Fix the waterer";
             this.questDescription = "I found the watering attachment for the tractor, but it's in bad shape, I should ask around town.";
@@ -113,15 +107,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 case WatererQuestState.InstallPart:
                     this.currentObjective = "Bring the fixed waterer to the garage.";
                     break;
-            }
-        }
-
-        public override void AdvanceStateForDayPassing()
-        {
-            if (this.State == WatererQuestState.WaitForMaruDay1)
-            {
-                this.State = WatererQuestState.WaitForMaruDay2;
-                Game1.player.mailForTomorrow.Add(MailKeys.WatererRepaired);
             }
         }
 

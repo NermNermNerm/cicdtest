@@ -52,16 +52,11 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         private const int ironBarCount = 10;
 
-        public SeederQuest(SeederQuestState initialState)
-            : base(initialState)
+        public SeederQuest(SeederQuestController controller)
+            : base(controller)
         {
             this.questTitle = "Fix the seeder";
             this.questDescription = "Turns out George had the seeder attachment, maybe he can be talked into fixing it.";
-        }
-
-        public SeederQuest()
-            : this(SeederQuestState.GotPart)
-        {
         }
 
         public void ReadyToInstall()
@@ -205,27 +200,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 case SeederQuestState.InstallPart:
                     this.currentObjective = "Bring the fixed seeder to the tractor garage.";
                     break;
-            }
-        }
-
-        public override void AdvanceStateForDayPassing()
-        {
-            if (this.State == SeederQuestState.WaitForEvelyn)
-            {
-                this.State = SeederQuestState.TalkToAlex1;
-            }
-            else if (this.State == SeederQuestState.WaitForHaleyDay1)
-            {
-                this.State = SeederQuestState.TalkToAlex2;
-            }
-            else if (this.State == SeederQuestState.WaitForAlexDay1)
-            {
-                this.State = SeederQuestState.WaitForAlexDay2;
-                Game1.player.mailForTomorrow.Add(MailKeys.AlexThankYouMail);
-            }
-            else if (this.State == SeederQuestState.WaitForAlexDay2)
-            {
-                this.State = SeederQuestState.GetPartFromGeorge;
             }
         }
 

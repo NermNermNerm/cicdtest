@@ -3,7 +3,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
 {
     public enum RestorationState
     {
-        NotStarted,
         TalkToLewis,
         TalkToSebastian,
         TalkToLewisAgain,

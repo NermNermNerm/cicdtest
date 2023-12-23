@@ -3,14 +3,28 @@ using StardewValley;
 namespace NermNermNerm.Stardew.QuestableTractor
 {
     internal class SeederQuestController
-        : TractorPartQuestController<SeederQuestState, SeederQuest>
+        : TractorPartQuestController<SeederQuestState>
     {
         public SeederQuestController(ModEntry mod) : base(mod) { }
 
-        protected override SeederQuest CreateQuest() => new SeederQuest();
+        protected override SeederQuestState AdvanceStateForDayPassing(SeederQuestState oldState)
+        {
+            if (oldState == SeederQuestState.WaitForAlexDay1)
+            {
+                Game1.player.mailForTomorrow.Add(MailKeys.AlexThankYouMail);
+            }
 
-        protected override SeederQuest CreateQuestFromDeserializedState(SeederQuestState initialState)
-            => new SeederQuest(initialState);
+            return oldState switch
+            {
+                SeederQuestState.WaitForEvelyn => SeederQuestState.TalkToAlex1,
+                SeederQuestState.WaitForHaleyDay1 => SeederQuestState.TalkToAlex2,
+                SeederQuestState.WaitForAlexDay1 => SeederQuestState.WaitForAlexDay2,
+                SeederQuestState.WaitForAlexDay2 => SeederQuestState.GetPartFromGeorge,
+                _ => oldState
+            };
+        }
+
+        protected override SeederQuest CreateQuest() => new SeederQuest(this);
 
         protected override string QuestCompleteMessage => "Awesome!  You've now got a way to plant and fertilize crops with your tractor!#$b#HINT: To use it, equip seeds or fertilizers while on the tractor.";
 
@@ -25,7 +39,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
         protected override void HideStarterItemIfNeeded()
         {
             if (Game1.player.getFriendshipHeartLevelForNPC("George") >= SeederQuest.GeorgeSendsBrokenPartHeartLevel
-                && RestoreTractorQuest.IsTractorUnlocked
+                && this.Mod.RestoreTractorQuestController.IsComplete
                 && !Game1.player.modData.ContainsKey(ModDataKeys.SeederQuestGeorgeSentMail))
             {
                 Game1.player.mailbox.Add(MailKeys.GeorgeSeederMail);

@@ -82,7 +82,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
         internal void OnDayStarted()
         {
             // TractorMod creates a tractor on day start.  We remove it if it's not configured.  Otherwise, doing nothing is the right thing.
-            if (!RestoreTractorQuest.IsTractorUnlocked)
+            if (!this.mod.RestoreTractorQuestController.IsComplete)
             {
                 Farm farm = Game1.getFarm();
                 var tractorIds = farm.buildings.OfType<Stable>().Where(s => s.buildingType.Value == GarageBuildingId).Select(s => s.HorseId).ToHashSet();

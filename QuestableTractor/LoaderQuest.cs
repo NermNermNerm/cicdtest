@@ -1,5 +1,4 @@
 using System.Linq;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Xna.Framework;
 using StardewValley;
 using StardewValley.GameData.GarbageCans;
@@ -14,13 +13,12 @@ namespace NermNermNerm.Stardew.QuestableTractor
     {
         private static readonly Vector2 placeInMineForShoes = new Vector2(48, 8);
 
-        public LoaderQuest() : this(LoaderQuestState.TalkToClint) { }
-
-        public LoaderQuest(LoaderQuestState state)
-            : base(LoaderQuestState.TalkToClint)
+        public LoaderQuest(LoaderQuestController controller)
+            : base(controller)
         {
             this.questTitle = "Fix the loader";
             this.questDescription = "I found the front end loader attachment for the tractor, but it's all bent up and rusted through in spots.";
+            this.SetObjective();
         }
 
         protected override void SetObjective()
@@ -125,32 +123,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
         }
 
-        public override void AdvanceStateForDayPassing()
-        {
-            switch (this.State)
-            {
-                case LoaderQuestState.LinusSniffing1:
-                    this.State = LoaderQuestState.LinusSniffing2;
-                    break;
-                case LoaderQuestState.LinusSniffing2:
-                    this.State = LoaderQuestState.LinusSniffing3;
-                    break;
-                case LoaderQuestState.LinusSniffing3:
-                    this.State = LoaderQuestState.LinusSniffing4;
-                    break;
-                case LoaderQuestState.LinusSniffing4:
-                    this.State = LoaderQuestState.LinusSniffing5;
-                    Game1.player.mailForTomorrow.Add(MailKeys.LinusFoundShoes);
-                    break;
-                case LoaderQuestState.WaitForClint1:
-                    this.State = LoaderQuestState.WaitForClint2;
-                    break;
-                case LoaderQuestState.WaitForClint2:
-                    this.State = LoaderQuestState.PickUpLoader;
-                    break;
-            }
-        }
-
         private void PlantShoesNextToDwarf()
         {
             var mines = Game1.locations.FirstOrDefault(l => l.Name == "Mine");
@@ -189,25 +161,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
         private void InvalidateGarbageCanData()
         {
             this.Controller.Mod.Helper.GameContent.InvalidateCache("Data/GarbageCans");
-        }
-
-        internal void EditGarbageCanAsset(GarbageCanData gcd)
-        {
-            if (this.State >= LoaderQuestState.FindSomeShoes && this.State < LoaderQuestState.DisguiseTheShoes)
-            {
-                this.LogTrace("Added shoes to trashcan loot table");
-                gcd.GarbageCans["Evelyn"].Items.Add(new GarbageCanItemData()
-                {
-                    ItemId = ObjectIds.AlexesOldShoe,
-                    IgnoreBaseChance = true,
-                    Condition = "RANDOM 0.3 @addDailyLuck",
-                    Id = "QuestableTractor.AlexesOldShoe",
-                });
-            }
-            else
-            {
-                this.LogTrace("Left Evelyn's garbage can alone");
-            }
         }
 
         internal void OnPlayerGotOldShoes(Item oldShoes)

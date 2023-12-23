@@ -1,9 +1,6 @@
-using System;
 using System.Linq;
-using StardewModdingAPI;
 using StardewValley;
 using Microsoft.Xna.Framework;
-using System.Collections.Generic;
 
 namespace NermNermNerm.Stardew.QuestableTractor
 {
@@ -17,9 +14,8 @@ namespace NermNermNerm.Stardew.QuestableTractor
     ///   Quest Controllers should be constructed when the mod is initialized (in <code>Mod.Entry</code>)
     ///   and they are never destroyed.
     /// </remarks>
-    public abstract class TractorPartQuestController<TStateEnum, TQuest> : BaseQuestController<TStateEnum, TQuest>
-        where TStateEnum : struct, Enum
-        where TQuest : BaseQuest<TStateEnum>
+    public abstract class TractorPartQuestController<TQuestState> : BaseQuestController<TQuestState>
+        where TQuestState : struct
     {
         protected TractorPartQuestController(ModEntry mod) : base(mod) { }
 
@@ -33,41 +29,35 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         public override bool IsItemForThisQuest(Item item) => item.ItemId == this.BrokenAttachmentPartId;
 
-        /// <summary>
-        ///  Called when the main player gets the starter item for the quest.  Implmenetations should disable spawning any more quest starter items.
-        /// </summary>
-        protected virtual void OnQuestStarted() { }
-
         protected sealed override void OnDayStartedQuestNotStarted()
         {
             this.MonitorInventoryForItem(this.BrokenAttachmentPartId, this.PlayerGotBrokenPart);
             this.HideStarterItemIfNeeded();
         }
 
-        protected sealed override void OnDayStartedQuestInProgress(TQuest quest)
+        protected sealed override void OnDayStartedQuestInProgress()
         {
             this.MonitorInventoryForItem(this.WorkingAttachmentPartId, this.PlayerGotWorkingPart);
+            base.OnDayStartedQuestInProgress();
         }
 
         private void PlayerGotBrokenPart(Item brokenPart)
         {
-            if (Game1.player.questLog.OfType<TQuest>().Any())
+            if (this.IsStarted)
             {
                 this.LogWarning($"Player found a broken attachment, {brokenPart.ItemId}, when the quest was active?!");
                 return;
             }
 
             this.AnnounceGotBrokenPart(brokenPart);
-            var quest = this.CreateQuest();
-            Game1.player.questLog.Add(quest);
-            this.OnQuestStarted();
+            this.CreateQuestNew();
             this.MonitorInventoryForItem(this.WorkingAttachmentPartId, this.PlayerGotWorkingPart);
             this.StopMonitoringInventoryFor(this.BrokenAttachmentPartId);
         }
 
         public void PlayerGotWorkingPart(Item workingPart)
         {
-            var quest = Game1.player.questLog.OfType<TQuest>().FirstOrDefault();
+            var quest = this.GetQuest();
             if (quest is null)
             {
                 this.LogWarning($"Player found a working attachment, {workingPart.ItemId}, when the quest was not active?!");
@@ -79,6 +69,8 @@ namespace NermNermNerm.Stardew.QuestableTractor
             this.StopMonitoringInventoryFor(this.WorkingAttachmentPartId);
         }
 
+        protected abstract string QuestCompleteMessage { get; }
+
         public override bool PlayerIsInGarage(Item itemInHand)
         {
             if (itemInHand.ItemId != this.WorkingAttachmentPartId)
@@ -89,31 +81,18 @@ namespace NermNermNerm.Stardew.QuestableTractor
             var activeQuest = this.GetQuest();
             if (activeQuest is null)
             {
-                this.LogWarning($"An active {nameof(TQuest)} should exist, but doesn't?!");
+                this.LogWarning($"An active quest for {this.GetType().Name} should exist, but doesn't?!");
                 return false;
             }
 
-            activeQuest?.questComplete();
-            Game1.player.modData[this.ModDataKey] = QuestCompleteStateMagicWord;
+            activeQuest.questComplete();
+            this.RawQuestState = QuestCompleteStateMagicWord;
             Game1.player.removeFirstOfThisItemFromInventory(this.WorkingAttachmentPartId);
             Game1.DrawDialogue(new Dialogue(null, null, this.QuestCompleteMessage));
             return true;
         }
 
         protected virtual void HideStarterItemIfNeeded() { }
-
-        protected virtual TQuest? Deserialize(string storedValue)
-        {
-            if (!Enum.TryParse(storedValue, out TStateEnum parsedValue))
-            {
-                this.LogError($"Invalid value for moddata key, '{this.ModDataKey}': '{storedValue}' - quest state will revert to not started.");
-                return null;
-            }
-            else
-            {
-                return this.CreateQuestFromDeserializedState(parsedValue);
-            }
-        }
 
         protected void PlaceBrokenPartUnderClump(int preferredResourceClumpToHideUnder)
         {

@@ -1,10 +1,6 @@
-using System;
 using System.Linq;
-using Microsoft.Xna.Framework;
-using StardewModdingAPI;
 using StardewValley;
 using StardewValley.GameData.GarbageCans;
-using StardewValley.Locations;
 using StardewValley.TerrainFeatures;
 
 namespace NermNermNerm.Stardew.QuestableTractor
@@ -16,7 +12,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
 
     internal class LoaderQuestController
-        : TractorPartQuestController<LoaderQuestState, LoaderQuest>
+        : TractorPartQuestController<LoaderQuestState>
     {
         public LoaderQuestController(ModEntry mod) : base(mod) { }
 
@@ -26,14 +22,31 @@ namespace NermNermNerm.Stardew.QuestableTractor
         public override string BrokenAttachmentPartId => ObjectIds.BustedLoader;
         public override string HintTopicConversationKey => ConversationKeys.LoaderNotFound;
 
-        protected override LoaderQuest CreateQuest() => new LoaderQuest();
-
-        protected override LoaderQuest CreateQuestFromDeserializedState(LoaderQuestState initialState) => new LoaderQuest(initialState);
-
-        protected override void OnQuestStarted()
+        protected override LoaderQuest CreateQuest()
         {
-            this.MonitorQuestItems();
-            base.OnQuestStarted();
+            return new LoaderQuest(this);
+        }
+
+        protected override LoaderQuestState AdvanceStateForDayPassing(LoaderQuestState initialState)
+        {
+            switch (initialState)
+            {
+                case LoaderQuestState.LinusSniffing1:
+                    return LoaderQuestState.LinusSniffing2;
+                case LoaderQuestState.LinusSniffing2:
+                    return LoaderQuestState.LinusSniffing3;
+                case LoaderQuestState.LinusSniffing3:
+                    return LoaderQuestState.LinusSniffing4;
+                case LoaderQuestState.LinusSniffing4:
+                    Game1.player.mailForTomorrow.Add(MailKeys.LinusFoundShoes);
+                    return LoaderQuestState.LinusSniffing5;
+                case LoaderQuestState.WaitForClint1:
+                    return LoaderQuestState.WaitForClint2;
+                case LoaderQuestState.WaitForClint2:
+                    return LoaderQuestState.PickUpLoader;
+                default:
+                    return default;
+            }
         }
 
         protected override void MonitorQuestItems()
@@ -56,6 +69,8 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
         }
 
+        protected new LoaderQuest? GetQuest() => (LoaderQuest?)base.GetQuest();
+
         private void OnPlayerGotDisguisedShoes(Item dyedShoes)
         {
             this.StopMonitoringInventoryFor(ObjectIds.DisguisedShoe);
@@ -77,7 +92,21 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         internal void EditGarbageCanAsset(GarbageCanData gcd)
         {
-            this.GetQuest()?.EditGarbageCanAsset(gcd);
+            if (this.State >= LoaderQuestState.FindSomeShoes && this.State < LoaderQuestState.DisguiseTheShoes)
+            {
+                this.LogTrace("Added shoes to trashcan loot table");
+                gcd.GarbageCans["Evelyn"].Items.Add(new GarbageCanItemData()
+                {
+                    ItemId = ObjectIds.AlexesOldShoe,
+                    IgnoreBaseChance = true,
+                    Condition = "RANDOM 0.3 @addDailyLuck",
+                    Id = "QuestableTractor.AlexesOldShoe",
+                });
+            }
+            else
+            {
+                this.LogTrace("Left Evelyn's garbage can alone");
+            }
         }
-     }
+    }
 }

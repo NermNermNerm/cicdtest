@@ -6,39 +6,36 @@ using StardewValley.Quests;
 
 namespace NermNermNerm.Stardew.QuestableTractor
 {
-
-    public abstract class BaseQuest<TStateEnum> : Quest, ISimpleLog
-        where TStateEnum : struct, Enum
+    public abstract class BaseQuest : Quest, ISimpleLog
     {
-        private TStateEnum state;
-
-        protected BaseQuest(TStateEnum state)
+        protected BaseQuest(BaseQuestController controller)
         {
-            this.state = state;
-            this.SetObjective();
+            this.Controller = controller;
         }
 
-        /// <summary>
-        ///   Used to disable the sound made by <see cref="IndicateQuestHasMadeProgress"/> during automated unpacking
-        ///   and start-of-day changes.  It starts out false and then gets made true after the quest is deserialized
-        /// </summary>
-        public bool MakeSoundOnAdvancement { get; internal set; } = false;
-
-        public TStateEnum State
+        public string RawState
         {
-            get => this.state;
+            get
+            {
+                if (this.Controller.OverallQuestState != OverallQuestState.InProgress)
+                {
+                    throw new Exception("Quest is not in progress");
+                }
+
+                return this.Controller.RawQuestState!; // State of in-progress guarantees non-null
+            }
             set
             {
-                if (!value.Equals(this.state))
+                if (this.Controller.OverallQuestState == OverallQuestState.InProgress && this.Controller.RawQuestState != value)
                 {
                     this.IndicateQuestHasMadeProgress();
                 }
-                this.state = value;
-                this.SetObjective();
+
+                this.Controller.RawQuestState = value;
             }
         }
 
-        public BaseQuestController Controller { get; internal set; } = null!;
+        public BaseQuestController Controller { get; }
 
         /// <summary>
         ///  Called on either actual or possible interaction with an NPC that could have bearing on a quest.
@@ -90,15 +87,12 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         public void IndicateQuestHasMadeProgress()
         {
-            if (this.MakeSoundOnAdvancement)
-            {
-                Game1.playSound("questcomplete"); // Note documentation suggests its for quest complete and "journal update".  That's what we are using it for.
-            }
+            Game1.playSound("questcomplete"); // Note documentation suggests its for quest complete and "journal update".  That's what we are using it for.
         }
 
         protected abstract void SetObjective();
 
-        public abstract void GotWorkingPart(Item workingPart);
+        public virtual void GotWorkingPart(Item workingPart) { } // TODO: Create a TractorPartQuest class to go with TractorPartQuestController to house this - make it abstract there
 
         // Putting this implementation here denies a few other usages, and it also means that our suppressions are
         //  tied to the quest, and thus get tossed out every day.  I can't say if that's a bug or a feature right now.
@@ -129,8 +123,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
         }
 
         public void Spout(string message) => BaseQuestController.Spout(message);
-
-        public virtual string Serialize() => this.state.ToString();
 
         protected void AddItemToInventory(string itemId)
         {
@@ -186,9 +178,25 @@ namespace NermNermNerm.Stardew.QuestableTractor
             return true;
         }
 
-        public virtual void AdvanceStateForDayPassing() {}
-
         public virtual void WriteToLog(string message, StardewModdingAPI.LogLevel level, bool isOnceOnly)
             => this.Controller.WriteToLog(message, level, isOnceOnly);
+    }
+
+    public abstract class BaseQuest<TStateEnum> : BaseQuest
+        where TStateEnum : struct
+    {
+        public BaseQuest(BaseQuestController<TStateEnum> controller) : base(controller) { }
+
+        public new BaseQuestController<TStateEnum> Controller => (BaseQuestController<TStateEnum>)base.Controller;
+
+        public TStateEnum State
+        {
+            get => this.Controller.State;
+            set
+            {
+                this.Controller.State = value;
+                this.SetObjective();
+            }
+        }
     }
 }

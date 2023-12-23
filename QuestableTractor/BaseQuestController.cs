@@ -4,6 +4,7 @@ using StardewModdingAPI;
 using StardewValley;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
+using StardewValley.Quests;
 
 namespace NermNermNerm.Stardew.QuestableTractor
 {
@@ -28,13 +29,10 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         public ModEntry Mod { get; }
 
-        public abstract void OnDayStarted();
-        public abstract void OnDayEnding();
+        protected abstract string ModDataKey { get; }
 
-        protected virtual string? ModDataKey { get; } = null;
-
-        public virtual bool IsStarted => Game1.MasterPlayer.modData.ContainsKey(this.ModDataKey);
-        public virtual bool IsComplete => Game1.MasterPlayer.modData.TryGetValue(this.ModDataKey, out string value) && value == QuestCompleteStateMagicWord;
+        public bool IsStarted => this.OverallQuestState != OverallQuestState.NotStarted;
+        public bool IsComplete => this.OverallQuestState == OverallQuestState.Completed;
 
         public static void Spout(string message)
         {
@@ -94,6 +92,40 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
         }
 
+        public string? RawQuestState
+        {
+            get
+            {
+                Game1.player.modData.TryGetValue(this.ModDataKey, out string storedValue);
+                return storedValue;
+            }
+            set
+            {
+                if (!Game1.player.IsMainPlayer)
+                {
+                    throw new NotImplementedException("QuestableTractorMod quests should only be playable by the main player");
+                }
+
+                if (value is null)
+                {
+                    Game1.player.modData.Remove(this.ModDataKey);
+                }
+                else
+                {
+                    Game1.player.modData[this.ModDataKey] = value;
+                }
+            }
+        }
+
+        public OverallQuestState OverallQuestState =>
+            this.RawQuestState switch
+            {
+                null => OverallQuestState.NotStarted,
+                QuestCompleteStateMagicWord => OverallQuestState.Completed,
+                _ => OverallQuestState.InProgress
+            };
+
+
         /// <summary>
         ///   This is a hacky way to deal with quest completion until something more clever can be thought up.
         ///   Right now this gets called in the 1-second-tick callback.  It returns true if the item resulted
@@ -103,110 +135,59 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         public virtual void WriteToLog(string message, LogLevel level, bool isOnceOnly)
             => ((ISimpleLog)this.Mod).WriteToLog(message, level, isOnceOnly);
-    }
 
+        /// <summary>
+        ///   Creates a new instance of the Quest object, assuming the State is correct.
+        /// </summary>
+        /// <remarks>
+        ///   Perhaps it should also take the role of ensuring that the state is actually valid
+        ///   and correcting it if not.
+        /// </remarks>
+        protected abstract BaseQuest CreateQuest();
 
-    public abstract class BaseQuestController<TStateEnum, TQuest> : BaseQuestController
-        where TStateEnum : struct, Enum
-        where TQuest : BaseQuest<TStateEnum>
-    {
-        protected BaseQuestController(ModEntry mod) : base(mod) { }
+        protected abstract string InitialQuestState { get; }
 
-        protected virtual TQuest CreateQuestFromDeserializedState(TStateEnum initialState)
+        /// <summary>
+        ///   Creates a new instance of the Quest object, assuming the State empty.
+        /// </summary>
+        public void CreateQuestNew()
         {
-            throw new Exception("Implementations of BaseQuestController must override either CreateQuestFromDeserializedState and ModDataKey or Deserialize");
+            this.RawQuestState = this.InitialQuestState;
+            var quest = this.CreateQuest();
+            Game1.player.questLog.Add(quest);
+            this.MonitorQuestItems();
         }
 
-        protected abstract TQuest CreateQuest();
-
-        public TQuest? GetQuest() => Game1.player.questLog.OfType<TQuest>().FirstOrDefault();
-
-        protected abstract string QuestCompleteMessage { get; }
-
-        protected enum QuestState
-        {
-            NotStarted,
-            InProgress,
-            Completed,
-        };
-
-        protected virtual QuestState Deserialize(out TQuest? quest)
-        {
-            if (this.ModDataKey is null)
-            {
-                throw new Exception("Subclasses of BaseQuestController should either set ModDataKey or override Deserialize");
-            }
-
-            if (!Game1.player.modData.TryGetValue(this.ModDataKey, out string storedValue))
-            {
-                quest = null;
-                return QuestState.NotStarted;
-            }
-
-            if (storedValue == QuestCompleteStateMagicWord)
-            {
-                quest = null;
-                return QuestState.Completed;
-            }
-
-            return this.DeserializeSingleKey(storedValue, out quest);
-        }
-
-        protected virtual QuestState DeserializeSingleKey(string storedValue, out TQuest? quest)
-        {
-            if (!Enum.TryParse(storedValue, out TStateEnum parsedValue))
-            {
-                this.LogError($"Invalid value for moddata key, '{this.ModDataKey}': '{storedValue}' - quest state will revert to not started.");
-                quest = null;
-                return QuestState.Completed;
-            }
-
-            quest = this.CreateQuestFromDeserializedState(parsedValue);
-            return QuestState.InProgress;
-        }
+        public BaseQuest? GetQuest() => Game1.player.questLog.OfType<BaseQuest>().FirstOrDefault(bc => bc.Controller == this);
 
         protected virtual void OnDayStartedQuestNotStarted()
         {
-            if (this.HintTopicConversationKey is not null)
-            {
-                // Our stuff recurs every week for 4 days out of the week.  Delay until after the
-                // first week so that the introductions quest runs to completion.  Perhaps it
-                // would be better to delay until all the villagers we care about have been greeted.
-                if (Game1.Date.DayOfWeek == DayOfWeek.Sunday)
-                {
-                    // TODO: Drop hint
-                }
-            }
-
-            // 
             // implementations should hide the quest starter
         }
 
-        protected virtual void OnDayStartedQuestInProgress(TQuest quest)
-        {
-            quest.AdvanceStateForDayPassing();
-        }
+        protected abstract void OnDayStartedQuestInProgress();
 
         protected virtual void OnDayStartedQuestComplete()
         {
         }
 
-        public sealed override void OnDayStarted()
+        public void OnDayStarted()
         {
-            var state = this.Deserialize(out var newQuest);
-            if (newQuest is not null)
+            switch (this.OverallQuestState)
             {
-                newQuest.MarkAsViewed();
-                newQuest.MakeSoundOnAdvancement = true;
-                Game1.player.questLog.Add(newQuest);
-            }
-            else if (state == QuestState.NotStarted)
-            {
-                this.OnDayStartedQuestNotStarted();
-            }
-            else
-            {
-                this.OnDayStartedQuestComplete();
+                case OverallQuestState.NotStarted:
+                    this.OnDayStartedQuestNotStarted();
+                    break;
+                case OverallQuestState.InProgress:
+                    this.OnDayStartedQuestInProgress();
+                    var newQuest = this.CreateQuest();
+                    newQuest.MarkAsViewed();
+                    Game1.player.questLog.Add(newQuest);
+                    this.MonitorQuestItems();
+                    break;
+                case OverallQuestState.Completed:
+                    this.OnDayStartedQuestComplete();
+                    break;
             }
         }
 
@@ -215,24 +196,50 @@ namespace NermNermNerm.Stardew.QuestableTractor
         /// </summary>
         protected virtual void MonitorQuestItems() { }
 
-        public override void OnDayEnding()
+        public void OnDayEnding()
         {
-            var quest = Game1.player.questLog.OfType<TQuest>().FirstOrDefault();
-            if (quest is not null)
+            Game1.player.questLog.RemoveWhere(q => q is BaseQuest bq && bq.Controller == this);
+        }
+    }
+
+    public abstract class BaseQuestController<TQuestState>
+        : BaseQuestController
+        where TQuestState : struct
+    {
+        public BaseQuestController(ModEntry mod) : base(mod) { }
+
+        protected override string InitialQuestState => default(TQuestState).ToString()!;
+
+        public TQuestState State
+        {
+            get
             {
-                this.SaveQuestAtEndOfDay(quest);
-                Game1.player.questLog.RemoveWhere(q => q is TQuest);
+                string? rawState = this.RawQuestState;
+                if (rawState == null)
+                {
+                    throw new InvalidOperationException("State should not be queried when the quest isn't started");
+                }
+
+                if (!Enum.TryParse(rawState, out TQuestState result))
+                {
+                    // Part of the design of the state enums should include making sure that the default value of
+                    // the enum is the starting condition of the quest, so we can possibly recover from this error.
+                    this.LogError($"{this.GetType().Name} quest has invalid state: {rawState}");
+                }
+
+                return result;
+            }
+            set
+            {
+                this.RawQuestState = value.ToString();
             }
         }
 
-        public virtual void SaveQuestAtEndOfDay(TQuest quest)
+        protected override void OnDayStartedQuestInProgress()
         {
-            if (this.ModDataKey is null)
-            {
-                throw new Exception("If ModDataKey is not supplied, SaveQuestAtEndOfDay should be overridden");
-            }
-
-            Game1.player.modData[this.ModDataKey] = quest.Serialize();
+            this.State = this.AdvanceStateForDayPassing(this.State);
         }
+
+        protected abstract TQuestState AdvanceStateForDayPassing(TQuestState oldState);
     }
 }

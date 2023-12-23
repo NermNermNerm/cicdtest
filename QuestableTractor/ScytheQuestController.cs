@@ -4,14 +4,11 @@ using StardewValley.TerrainFeatures;
 
 namespace NermNermNerm.Stardew.QuestableTractor
 {
-    public class ScytheQuestController : TractorPartQuestController<ScytheQuestState, ScytheQuest>
+    public class ScytheQuestController : TractorPartQuestController<ScytheQuestState>
     {
         public ScytheQuestController(ModEntry mod) : base(mod) { }
 
-        protected override ScytheQuest CreateQuest() => new ScytheQuest();
-
-        protected override ScytheQuest CreateQuestFromDeserializedState(ScytheQuestState initialState)
-            => throw new NotImplementedException(); // No implementation because we override Deserialize
+        protected override ScytheQuest CreateQuest() => new ScytheQuest(this);
 
         public override string WorkingAttachmentPartId => ObjectIds.WorkingScythe;
         public override string BrokenAttachmentPartId => ObjectIds.BustedScythe;
@@ -20,36 +17,33 @@ namespace NermNermNerm.Stardew.QuestableTractor
         protected override string ModDataKey => ModDataKeys.ScytheQuestStatus;
         protected override void HideStarterItemIfNeeded() => base.PlaceBrokenPartUnderClump(ResourceClump.hollowLogIndex);
 
-        protected override ScytheQuest? Deserialize(string statusAsString)
+
+        protected override ScytheQuestState AdvanceStateForDayPassing(ScytheQuestState oldState) => oldState;
+
+        public new ScytheQuestState State
         {
-            if (!TryParseQuestStatus(statusAsString, out ScytheQuestState state, out bool[] flags))
+            get
             {
-                this.LogError($"Invalid value for {ModDataKeys.ScytheQuestStatus}: {statusAsString} -- reverting to NotStarted");
-                return null;
-            }
-
-            return new ScytheQuest(state, flags[0], flags[1], flags[2], flags[3], this);
-        }
-
-        private static bool TryParseQuestStatus(string s, out ScytheQuestState state, out bool[] flags)
-        {
-            string[] splits = s.Split(',');
-            if (!Enum.TryParse(splits[0], out state) || (splits.Length != 1 && splits.Length != 5))
-            {
-                flags = new bool[0];
-                return false;
-            }
-
-            flags = new bool[splits.Length - 1];
-            for (int i = 1; i < splits.Length; i++)
-            {
-                if (!bool.TryParse(splits[i], out flags[i - 1]))
+                string? rawState = this.RawQuestState;
+                if (rawState == null)
                 {
-                    return false;
+                    throw new InvalidOperationException("State should not be queried when the quest isn't started");
                 }
-            }
 
-            return true;
+                if (!ScytheQuestState.TryParse(rawState, out var result))
+                {
+                    // Part of the design of the state enums should include making sure that the default value of
+                    // the enum is the starting condition of the quest, so we can possibly recover from this error.
+                    this.LogError($"{this.GetType().Name} quest has invalid state: {rawState}");
+                }
+
+                return result;
+            }
+            set
+            {
+                this.RawQuestState = value.ToString();
+            }
         }
+
     }
 }
