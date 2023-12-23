@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Buildings;
 using StardewValley.TerrainFeatures;
@@ -111,11 +110,13 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         public static void PlaceInGarage(ModEntry mod, Stable garage)
         {
+            mod.LogInfoOnce($"Derelict tractor drawn in garage at {garage.tileX.Value},{garage.tileY.Value}");
             Place(mod, new Vector2(garage.tileX.Value + 1, garage.tileY.Value + 1));
         }
 
         private static void Place(ModEntry mod, Vector2 position)
         {
+            mod.LogInfoOnce($"Derelict tractor drawn at {position}");
             var derelictTractorTexture = mod.Helper.ModContent.Load<Texture2D>("assets/rustyTractor.png");
 
             var tf = new DerelictTractorTerrainFeature(mod, derelictTractorTexture, position);
