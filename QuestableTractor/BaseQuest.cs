@@ -92,8 +92,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         protected abstract void SetObjective();
 
-        public virtual void GotWorkingPart(Item workingPart) { } // TODO: Create a TractorPartQuest class to go with TractorPartQuestController to house this - make it abstract there
-
         // Putting this implementation here denies a few other usages, and it also means that our suppressions are
         //  tied to the quest, and thus get tossed out every day.  I can't say if that's a bug or a feature right now.
         private HashSet<string> oldNews = new HashSet<string>();

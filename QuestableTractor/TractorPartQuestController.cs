@@ -22,6 +22,12 @@ namespace NermNermNerm.Stardew.QuestableTractor
         public abstract string WorkingAttachmentPartId { get; }
         public abstract string BrokenAttachmentPartId { get; }
 
+        protected sealed override BaseQuest CreateQuest() => this.CreatePartQuest();
+
+        public new TractorPartQuest<TQuestState>? GetQuest() => (TractorPartQuest<TQuestState>?)base.GetQuest();
+
+        protected abstract TractorPartQuest<TQuestState> CreatePartQuest();
+
         public virtual void AnnounceGotBrokenPart(Item brokenPart)
         {
             Game1.player.holdUpItemThenMessage(brokenPart);

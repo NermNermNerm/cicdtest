@@ -8,7 +8,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
     {
         public ScytheQuestController(ModEntry mod) : base(mod) { }
 
-        protected override ScytheQuest CreateQuest() => new ScytheQuest(this);
+        protected override ScytheQuest CreatePartQuest() => new ScytheQuest(this);
 
         public override string WorkingAttachmentPartId => ObjectIds.WorkingScythe;
         public override string BrokenAttachmentPartId => ObjectIds.BustedScythe;

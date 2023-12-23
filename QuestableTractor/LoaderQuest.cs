@@ -9,7 +9,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
     ///  Implements the quest line for the Axe and Pick tools, which we're treating as a single thing.
     /// </summary>
     internal class LoaderQuest
-        : BaseQuest<LoaderQuestState>
+        : TractorPartQuest<LoaderQuestState>
     {
         private static readonly Vector2 placeInMineForShoes = new Vector2(48, 8);
 

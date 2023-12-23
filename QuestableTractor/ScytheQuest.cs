@@ -5,7 +5,7 @@ using StardewValley;
 namespace NermNermNerm.Stardew.QuestableTractor
 {
     public class ScytheQuest
-        : BaseQuest<ScytheQuestState>
+        : TractorPartQuest<ScytheQuestState>
     {
         internal ScytheQuest(ScytheQuestController controller)
             : base(controller)

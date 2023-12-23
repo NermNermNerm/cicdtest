@@ -5,7 +5,7 @@ using StardewValley;
 namespace NermNermNerm.Stardew.QuestableTractor
 {
     public class WatererQuest
-        : BaseQuest<WatererQuestState>
+        : TractorPartQuest<WatererQuestState>
     {
         private const int goldBarCount = 10;
 

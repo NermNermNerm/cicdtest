@@ -22,7 +22,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
         public override string BrokenAttachmentPartId => ObjectIds.BustedLoader;
         public override string HintTopicConversationKey => ConversationKeys.LoaderNotFound;
 
-        protected override LoaderQuest CreateQuest()
+        protected override LoaderQuest CreatePartQuest()
         {
             return new LoaderQuest(this);
         }

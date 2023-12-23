@@ -3,7 +3,7 @@ using StardewValley;
 namespace NermNermNerm.Stardew.QuestableTractor
 {
     internal class SeederQuest
-        : BaseQuest<SeederQuestState>
+        : TractorPartQuest<SeederQuestState>
     {
         private bool pesteredGeorgeToday = false; // Ensure the player doesn't zero out their hearts with George banging on this quest.
 
