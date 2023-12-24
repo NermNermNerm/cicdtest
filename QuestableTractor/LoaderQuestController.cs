@@ -92,7 +92,8 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         internal void EditGarbageCanAsset(GarbageCanData gcd)
         {
-            if (this.State >= LoaderQuestState.FindSomeShoes && this.State < LoaderQuestState.DisguiseTheShoes)
+            if (this.OverallQuestState == OverallQuestState.InProgress &&
+                this.State >= LoaderQuestState.FindSomeShoes && this.State < LoaderQuestState.DisguiseTheShoes)
             {
                 this.LogTrace("Added shoes to trashcan loot table");
                 gcd.GarbageCans["Evelyn"].Items.Add(new GarbageCanItemData()

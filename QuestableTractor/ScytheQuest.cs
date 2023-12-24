@@ -58,6 +58,11 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 this.Spout(n, "That's the old harvester for the tractor?  I guess it looks like that.  You think it's incomplete?$s#$b#You might ask Jaz and Vincent to help look for other parts like that - they told me they used to play out in your south pasture, but they don't anymore because Marnie shooed them away.$4");
                 this.State = new ScytheQuestState { Progress = ScytheQuestStateProgress.JasAndVincentFingered };
             }
+            else if (n.Name == "Abigail" && this.State.Progress < ScytheQuestStateProgress.JasAndVincentFingered)
+            {
+                this.Spout(n, "Oh yeah I've seen that - wedged under a tree, right?  Must have been a feat to get it out!#$b#Did Jaz or Vincent tell you where to find it?  They used to play near it quite a bit.");
+                this.State = new ScytheQuestState { Progress = ScytheQuestStateProgress.JasAndVincentFingered };
+            }
             else if (n.Name == "Jodi" && this.State.Progress == ScytheQuestStateProgress.NoCluesYet)
             {
                 this.Spout(n, "What is that thing?  A harvester?  Sure, if you say so...  I tell you though, something about that thing seems familiar to me.$s#$b#Well, it looks like a mess, and I've cleaned up a lot messes.  It must be that!$l");
