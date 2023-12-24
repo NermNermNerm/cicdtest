@@ -3,7 +3,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
 {
     public enum LoaderQuestState
     {
-        NotStarted,
         TalkToClint,
         FindSomeShoes,
         SnagAlexsOldShoes,
@@ -18,6 +17,5 @@ namespace NermNermNerm.Stardew.QuestableTractor
         WaitForClint2,
         PickUpLoader,
         InstallTheLoader,
-        Complete,
     }
 }

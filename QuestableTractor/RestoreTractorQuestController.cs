@@ -23,8 +23,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         protected override string ModDataKey => ModDataKeys.MainQuestStatus;
 
-        public override bool IsItemForThisQuest(Item item) => item.ItemId == ObjectIds.BustedEngine;
-
         private Stable? GetGarage() => Game1.getFarm().buildings.OfType<Stable>().FirstOrDefault(s => s.buildingType.Value == TractorModConfig.GarageBuildingId);
 
         protected override RestorationState AdvanceStateForDayPassing(RestorationState oldState)

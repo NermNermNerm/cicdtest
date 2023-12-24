@@ -137,19 +137,25 @@ namespace NermNermNerm.Stardew.QuestableTractor
             // things get found, but maybe it'd be better to figure that it takes a while for
             // word to get around...  Although there might be some awkward dialogs with
             // townspeople directly involved in the quest.
-
             if (!this.restoreTractorQuestController.IsStarted)
             {
+                this.LogTrace($"Added conversation key: {ConversationKeys.TractorNotFound}");
                 Game1.player.activeDialogueEvents.Add(ConversationKeys.TractorNotFound, 4);
             }
             else
             {
-                string[] possibleHintTopics = this.QuestControllers
+                string[] possibleHintTopics = new BaseQuestController[] { this.loaderQuestController, this.scytheQuestController, this.watererQuestController, this.seederQuestController }
                     .Where(qc => !qc.IsStarted && qc.HintTopicConversationKey is not null)
                     .Select(qc => qc.HintTopicConversationKey!).ToArray();
                 if (possibleHintTopics.Any())
                 {
-                    Game1.player.activeDialogueEvents.Add(possibleHintTopics[Game1.random.Next(possibleHintTopics.Length)], 4);
+                    string keyOfTheDay = possibleHintTopics[Game1.random.Next(possibleHintTopics.Length)];
+                    this.LogTrace($"Added conversation key: {keyOfTheDay}");
+                    Game1.player.activeDialogueEvents.Add(keyOfTheDay, 4);
+                }
+                else
+                {
+                    this.LogTraceOnce("All quests are in-progress, no hint topics given.");
                 }
             }
         }

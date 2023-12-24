@@ -33,8 +33,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
             Game1.player.holdUpItemThenMessage(brokenPart);
         }
 
-        public override bool IsItemForThisQuest(Item item) => item.ItemId == this.BrokenAttachmentPartId;
-
         protected sealed override void OnDayStartedQuestNotStarted()
         {
             this.MonitorInventoryForItem(this.BrokenAttachmentPartId, this.PlayerGotBrokenPart);

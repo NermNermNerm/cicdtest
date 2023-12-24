@@ -27,9 +27,9 @@ namespace NermNermNerm.Stardew.QuestableTractor
             return new LoaderQuest(this);
         }
 
-        protected override LoaderQuestState AdvanceStateForDayPassing(LoaderQuestState initialState)
+        protected override LoaderQuestState AdvanceStateForDayPassing(LoaderQuestState oldState)
         {
-            switch (initialState)
+            switch (oldState)
             {
                 case LoaderQuestState.LinusSniffing1:
                     return LoaderQuestState.LinusSniffing2;
@@ -45,7 +45,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 case LoaderQuestState.WaitForClint2:
                     return LoaderQuestState.PickUpLoader;
                 default:
-                    return default;
+                    return oldState;
             }
         }
 

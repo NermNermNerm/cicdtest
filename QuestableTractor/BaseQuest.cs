@@ -14,28 +14,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
             this.SetObjective();
         }
 
-        public string RawState
-        {
-            get
-            {
-                if (this.Controller.OverallQuestState != OverallQuestState.InProgress)
-                {
-                    throw new Exception("Quest is not in progress");
-                }
-
-                return this.Controller.RawQuestState!; // State of in-progress guarantees non-null
-            }
-            set
-            {
-                if (this.Controller.OverallQuestState == OverallQuestState.InProgress && this.Controller.RawQuestState != value)
-                {
-                    this.IndicateQuestHasMadeProgress();
-                }
-
-                this.Controller.RawQuestState = value;
-            }
-        }
-
         public BaseQuestController Controller { get; }
 
         /// <summary>
@@ -75,7 +53,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 return false;
             }
 
-            if (item is not null && !this.Controller.IsItemForThisQuest(item))
+            if (item is not null && !this.IsItemForThisQuest(item))
             {
                 return false;
             }
@@ -84,7 +62,16 @@ namespace NermNermNerm.Stardew.QuestableTractor
             return false;
         }
 
+        public abstract bool IsItemForThisQuest(Item item);
+
+
         public abstract void CheckIfComplete(NPC n, Item? item);
+
+        public void SetDisplayAsNew()
+        {
+            this.showNew.Value = true;
+        }
+
 
         public void IndicateQuestHasMadeProgress()
         {
@@ -193,8 +180,12 @@ namespace NermNermNerm.Stardew.QuestableTractor
             get => this.Controller.State;
             set
             {
-                this.Controller.State = value;
-                this.SetObjective();
+                if (!this.State.Equals(value))
+                {
+                    this.IndicateQuestHasMadeProgress();
+                    this.Controller.State = value;
+                    this.SetObjective();
+                }
             }
         }
     }

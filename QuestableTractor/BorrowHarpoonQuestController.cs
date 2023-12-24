@@ -14,8 +14,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         protected override string ModDataKey => ModDataKeys.BorrowHarpoonQuestStatus;
 
-        public override bool IsItemForThisQuest(Item item) => item.ItemId == WatererQuestController.HarpoonToolId;
-
         protected override BorrowHarpoonQuestState AdvanceStateForDayPassing(BorrowHarpoonQuestState oldState) => oldState;
 
         protected override BaseQuest CreateQuest()

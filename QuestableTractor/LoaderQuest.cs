@@ -59,6 +59,9 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
         }
 
+        public override bool IsItemForThisQuest(Item item) =>
+            item.ItemId == ObjectIds.AlexesOldShoe || item.ItemId == ObjectIds.DisguisedShoe || base.IsItemForThisQuest(item);
+
         public override void GotWorkingPart(Item workingPart)
         {
             this.State = LoaderQuestState.InstallTheLoader;
@@ -74,15 +77,15 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
             else if (n?.Name == "Sam" && this.State < LoaderQuestState.SnagAlexsOldShoes && this.State > LoaderQuestState.TalkToClint)
             {
-                this.Spout(n, "Shoes, yeah man, they cost a fortune.  My gig at the library barely pays, so I roll around in these supercheapies from Joja.  I color mine every once in a while so they look fresh.");
+                this.Spout(n, "Shoes, yeah man, nice shoes cost a fortune.  My gig at the library barely pays, so I roll around in these supercheapies from Joja.  I color mine every once in a while so they look fresh.");
             }
             else if (n?.Name == "Abigail" && this.State < LoaderQuestState.SnagAlexsOldShoes && this.State > LoaderQuestState.TalkToClint)
             {
-                this.Spout(n, "Cheap shoes?  And you somehow deduce that I'm authority on such matters!  Hah, you're not far off.#$b#Back before the Jojamart we'd order them online, but now, I've learned the art of Thrift Stores.  I'm actually kindof glad it happened, I really like shopping at thrift stores.#$b#Cheaper than that?  Welp, you could always dumpster-dive!");
+                this.Spout(n, "Cheap shoes!  And you somehow deduce that *I* am authority on such matters?$5#$b$Heh.  Perhaps I am!$1#$b#Back before the Jojamart we'd order them online, but now, I've learned the art of Thrift Stores.  I'm actually kindof glad it happened, I really like shopping at thrift stores.#$b#Cheaper than that?  Welp, you could try dumpster-diving!$1");
             }
             else if (n?.Name == "Haley" && this.State < LoaderQuestState.SnagAlexsOldShoes && this.State > LoaderQuestState.TalkToClint)
             {
-                this.Spout(n, "Ladies' shoes I know.  Men's shoes I don't.");
+                this.Spout(n, "Ladies' shoes I know.  Men's shoes I don't.  'Cheap' shoes is definitely not something I spend time thinking about.$3");
             }
             else if (n?.Name == "Emily" && this.State < LoaderQuestState.SnagAlexsOldShoes && this.State > LoaderQuestState.TalkToClint)
             {
@@ -90,7 +93,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
             else if (n?.Name == "Sebastian" && this.State < LoaderQuestState.SnagAlexsOldShoes)
             {
-                this.Spout(n, "Shoes, yeah man, they cost a fortune.  My gig at the library barely pays, so I roll around in these supercheapies from Joja.  I use colored shoe-polish on mine every once in a while so they look fresh.");
+                this.Spout(n, "Shoes..  Yeah man, decent shoes cost a fortune.  I always wear black, though, which makes it easy.  Blacken anything and it looks cool.");
             }
             else if (n?.Name == "Alex" && this.State < LoaderQuestState.SnagAlexsOldShoes && this.State > LoaderQuestState.TalkToClint)
             {

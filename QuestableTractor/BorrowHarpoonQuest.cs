@@ -28,6 +28,8 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
         }
 
+        public override bool IsItemForThisQuest(Item item) => item.ItemId == WatererQuestController.HarpoonToolId;
+
         public void LandedTheWaterer() => this.State = BorrowHarpoonQuestState.ReturnThePole;
 
         public override void CheckIfComplete(NPC n, Item? item)

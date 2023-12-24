@@ -39,8 +39,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
             Game1.DrawDialogue(new Dialogue(null, null, message));
         }
 
-        public abstract bool IsItemForThisQuest(Item item);
-
         /// <summary>
         ///   Conversation keys are managed mod-wide, as there's a complex interplay, where
         ///   the main-quest conversation key is thrown up until that one gets started,
@@ -71,7 +69,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 this.isWatchingInventory = false;
             }
         }
-
 
         private void Player_InventoryChanged(object? sender, StardewModdingAPI.Events.InventoryChangedEventArgs e)
         {
@@ -154,6 +151,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
         {
             this.RawQuestState = this.InitialQuestState;
             var quest = this.CreateQuest();
+            quest.SetDisplayAsNew();
             Game1.player.questLog.Add(quest);
             this.MonitorQuestItems();
         }

@@ -2,7 +2,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
 {
     public enum WatererQuestState
     {
-        NotStarted,
         NoCluesYet,
         RobinFingered,
         MaruFingered,

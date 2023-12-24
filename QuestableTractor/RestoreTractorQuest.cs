@@ -1,7 +1,5 @@
-using System;
 using System.Linq;
 using StardewValley;
-using StardewValley.Buildings;
 
 namespace NermNermNerm.Stardew.QuestableTractor
 {
@@ -17,6 +15,11 @@ namespace NermNermNerm.Stardew.QuestableTractor
         {
             this.questTitle = "Investigate the tractor";
             this.questDescription = "There's a rusty old tractor in the fields; it sure would be nice if it could be restored.  Perhaps the townspeople can help.";
+        }
+
+        public override bool IsItemForThisQuest(Item item)
+        {
+            return item.ItemId == ObjectIds.BustedEngine || item.ItemId == ObjectIds.WorkingEngine;
         }
 
         protected override void SetObjective()
