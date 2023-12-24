@@ -92,7 +92,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             else if (nameWithoutLocale.IsEquivalentTo("Characters/Dialogue/Robin"))
             {
                 topics[ConversationKeys.TractorNotFound] = "Have you run across the old tractor yet?  That thing has some stories to tell, let me tell you.  It might make a good decoration for your front yard someday.";
-                topics[ConversationKeys.WatererNotFound] = "Oh you want to find the tractor's irrigator?  Ha!  Good luck with that!$b#$b#Who knows, maybe you can fish it out of there.$1#$b#Demetrius tried to winch it out and ended up, well, let's just say the creases on his trousers weren't quite as crisp as usual after that attempt!$1";
+                topics[ConversationKeys.WatererNotFound] = "Oh you want to find the tractor's irrigator?  Ha!  Good luck with that!$4#$b#Who knows, maybe you can fish it out!$1#$b#Demetrius tried to winch it out and ended up, well, let's just say the creases on his trousers weren't quite as crisp as usual after that attempt!$4";
                 topics[ConversationKeys.SeederNotFound] = "You know your Grandad and George were really good friends and it hit George pretty hard when your Granddad passed.$2#$b#You might do well to be nice to George; he might know a few secrets about your farm.";
             }
             else if (nameWithoutLocale.IsEquivalentTo("Characters/Dialogue/Willy"))

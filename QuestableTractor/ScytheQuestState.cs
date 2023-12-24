@@ -19,7 +19,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
         {
             string[] splits = s.Split(',');
             if (splits.Length != 5
-                || Enum.TryParse(splits[0], out ScytheQuestStateProgress progress))
+                || !Enum.TryParse(splits[0], out ScytheQuestStateProgress progress))
             {
                 fullState = default;
                 return false;
@@ -49,7 +49,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
     public enum ScytheQuestStateProgress
     {
-        NotStarted,
         NoCluesYet,
         MissingParts,
         JasAndVincentFingered,

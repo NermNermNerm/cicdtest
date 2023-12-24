@@ -20,30 +20,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         protected override ScytheQuestState AdvanceStateForDayPassing(ScytheQuestState oldState) => oldState;
 
-        public new ScytheQuestState State
-        {
-            get
-            {
-                string? rawState = this.RawQuestState;
-                if (rawState == null)
-                {
-                    throw new InvalidOperationException("State should not be queried when the quest isn't started");
-                }
-
-                if (!ScytheQuestState.TryParse(rawState, out var result))
-                {
-                    // Part of the design of the state enums should include making sure that the default value of
-                    // the enum is the starting condition of the quest, so we can possibly recover from this error.
-                    this.LogError($"{this.GetType().Name} quest has invalid state: {rawState}");
-                }
-
-                return result;
-            }
-            set
-            {
-                this.RawQuestState = value.ToString();
-            }
-        }
-
+        protected override bool TryParse(string rawState, out ScytheQuestState result) => ScytheQuestState.TryParse(rawState, out result);
     }
 }

@@ -75,6 +75,8 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         protected override void OnDayStartedQuestInProgress()
         {
+            base.OnDayStartedQuestInProgress();
+
             var state = this.State;
             if (state.IsDerelictInTheFields())
             {

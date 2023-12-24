@@ -218,7 +218,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
                     throw new InvalidOperationException("State should not be queried when the quest isn't started");
                 }
 
-                if (!Enum.TryParse(rawState, out TQuestState result))
+                if (!this.TryParse(rawState, out TQuestState result))
                 {
                     // Part of the design of the state enums should include making sure that the default value of
                     // the enum is the starting condition of the quest, so we can possibly recover from this error.
@@ -232,6 +232,8 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 this.RawQuestState = value.ToString();
             }
         }
+
+        protected virtual bool TryParse(string rawState, out TQuestState result) => Enum.TryParse(rawState, out result);
 
         protected override void OnDayStartedQuestInProgress()
         {

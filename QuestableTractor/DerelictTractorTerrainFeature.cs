@@ -110,7 +110,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         public static void PlaceInGarage(ModEntry mod, Stable garage)
         {
-            mod.LogInfoOnce($"Derelict tractor drawn in garage at {garage.tileX.Value},{garage.tileY.Value}");
+            mod.LogInfoOnce($"Derelict tractor is in the garage");
             Place(mod, new Vector2(garage.tileX.Value + 1, garage.tileY.Value + 1));
         }
 
