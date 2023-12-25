@@ -20,6 +20,9 @@ namespace NermNermNerm.Stardew.QuestableTractor
     /// </remarks>
     public abstract class BaseQuestController : ISimpleLog
     {
+        private readonly Dictionary<string, Action<Item>> itemsToWatch = new();
+        private bool isWatchingInventory;
+
         protected BaseQuestController(ModEntry mod)
         {
             this.Mod = mod;
@@ -45,10 +48,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
         ///   and then the part quest hints get dribbled out later.
         /// </summary>
         public virtual string? HintTopicConversationKey { get; } = null;
-
-        private readonly Dictionary<string, Action<Item>> itemsToWatch = new();
-
-        private bool isWatchingInventory;
 
         protected void MonitorInventoryForItem(string itemId, Action<Item> onItemAdded)
         {
@@ -105,7 +104,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
         {
             get
             {
-                Game1.player.modData.TryGetValue(this.ModDataKey, out string storedValue);
+                Game1.MasterPlayer.modData.TryGetValue(this.ModDataKey, out string storedValue);
                 return storedValue;
             }
             set
@@ -129,6 +128,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
                 if (wasChanged)
                 {
+                    this.LogTrace($"Set {Game1.player.Name}'s ModData[{this.ModDataKey}] to '{value ?? "<null>"}'");
                     this.OnStateChanged();
                 }
             }

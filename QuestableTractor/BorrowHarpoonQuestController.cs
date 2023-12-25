@@ -109,7 +109,9 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 {
                     Game1.playSound("submarine_landing");
                     borrowHarpoonQuest.LandedTheWaterer();
-                    return ItemRegistry.Create(ObjectIds.BustedWaterer);
+                    var waterer =  ItemRegistry.Create<StardewValley.Object>(ObjectIds.BustedWaterer);
+                    waterer.questItem.Value = true;
+                    return waterer;
                 }
                 else
                 {

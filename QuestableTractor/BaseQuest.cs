@@ -110,9 +110,11 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         public void Spout(string message) => BaseQuestController.Spout(message);
 
-        protected void AddItemToInventory(string itemId)
+        protected void AddQuestItemToInventory(string itemId)
         {
-            Game1.player.addItemByMenuIfNecessary(new StardewValley.Object(itemId, 1));
+            var item = ItemRegistry.Create<StardewValley.Object>(itemId);
+            item.questItem.Value = true;
+            Game1.player.addItemByMenuIfNecessary(item);
         }
 
         protected bool TryTakeItemsFromPlayer(string itemId, int count = 1)

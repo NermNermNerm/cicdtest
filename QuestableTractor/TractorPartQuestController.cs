@@ -111,7 +111,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             var existing = farm.objects.Values.FirstOrDefault(o => o.ItemId == this.BrokenAttachmentPartId);
             if (existing is not null)
             {
-                this.Mod.Monitor.VerboseLog($"{this.BrokenAttachmentPartId} is already placed at {existing.TileLocation.X},{existing.TileLocation.Y}");
+                this.LogInfoOnce($"{this.BrokenAttachmentPartId} is already placed at {existing.TileLocation.X},{existing.TileLocation.Y}");
                 return;
             }
 
@@ -119,9 +119,10 @@ namespace NermNermNerm.Stardew.QuestableTractor
             if (position != default)
             {
                 var o = ItemRegistry.Create<StardewValley.Object>(this.BrokenAttachmentPartId);
+                o.questItem.Value = true;
                 o.Location = Game1.getFarm();
                 o.TileLocation = position;
-                this.Mod.Monitor.VerboseLog($"{this.BrokenAttachmentPartId} placed at {position.X},{position.Y}");
+                this.LogInfoOnce($"{this.BrokenAttachmentPartId} placed at {position.X},{position.Y}");
                 o.IsSpawnedObject = true;
                 farm.objects[o.TileLocation] = o;
             }

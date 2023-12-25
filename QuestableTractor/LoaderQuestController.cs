@@ -51,6 +51,8 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         protected override void OnStateChanged()
         {
+            base.OnStateChanged();
+
             if (this.OverallQuestState == OverallQuestState.InProgress && this.State >= LoaderQuestState.FindSomeShoes && this.State < LoaderQuestState.GiveShoesToClint)
             {
                 this.MonitorInventoryForItem(ObjectIds.AlexesOldShoe, this.OnPlayerGotOldShoes);

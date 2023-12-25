@@ -96,7 +96,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
                     {
                         _ = this.TryTakeItemsFromPlayer(shinyItemId, 1);
 
-                        this.AddItemToInventory(ObjectIds.ScythePart2);
+                        this.AddQuestItemToInventory(ObjectIds.ScythePart2);
 
                         this.Spout(n, $"Ooh!  Oh this {shinyThing.DisplayName} is very sparkly!  Thanks!  Here's your thingamajig.  I sure hope it works!  I really want to ride on your tractor some day!$l");
                         this.State = this.State with { JasPartGot = true };
@@ -117,7 +117,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
             else if (n.Name == "Vincent" && this.State.VincentTradeKnown && this.TryTakeItemsFromPlayer("716", 3))
             {
-                this.AddItemToInventory(ObjectIds.ScythePart1);
+                this.AddQuestItemToInventory(ObjectIds.ScythePart1);
                 this.Spout(n, "Ooh!  Oh these 3 crawdads would be great!  Thanks!  Here's your thingamajig.  I Hope it works!$l#$b#Sure, I won't tell Mom that you gave them to me if you want...  Why?$s");
                 this.State = this.State with { VincentPartGot = true };
             }

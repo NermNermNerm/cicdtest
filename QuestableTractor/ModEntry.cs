@@ -232,19 +232,5 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 });
             }
         }
-
-        public static T Disabled<T>() where T : new()
-        {
-            var x = new T();
-            foreach (var prop in typeof(T).GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
-            {
-                if (prop.CanWrite && prop.PropertyType == typeof(bool))
-                {
-                    prop.SetValue(x, false, null);
-                }
-            }
-
-            return x;
-        }
     }
 }

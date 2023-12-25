@@ -1,9 +1,11 @@
 ﻿
-* Install new assets
-* Replace hard-coded item id's with id's found in StardewValley.Object
 * Make the scythe crafting recipe disappear after the quest closes
-* After tractor main quest is complete, building cost goes up.
-* Maybe a factory method in the controller would be a better thing for quest initialization.
+* Tractor Garage is always available for building at low cost.  Should not be there at start and go back to default after first one built.
+* Quest items are destructible
+* Harpoon casting graphics are broken
+* It'd be nice if we could get Sebastian working under the tractor
+* In multiplayer, it'll probably take a game reload for other players to get new tractor capabilities.
+
 
 Done
 * Can find shoes in garbage
@@ -18,3 +20,8 @@ Done
 * Loader is not delivered
 * Spreader name is messed up
 * Didn't get quest when spreader arrived
+* Install new assets
+
+TractorMod
+* Make the radius configurable per-tool
+* Make the running noise less annoying

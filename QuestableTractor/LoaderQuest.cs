@@ -111,7 +111,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             {
                 string treat = (n.Name == "Sam" ? "Pizza" : "Sashimi");
                 this.Spout(n, $"You want to borrow my shoe polish?  That's kindof an odd request but, you know what?  Sure.  Knock yourself out.#$b#There better be some {treat} in this for me somewhere down the road.");
-                this.AddItemToInventory(ObjectIds.DisguisedShoe);
+                this.AddQuestItemToInventory(ObjectIds.DisguisedShoe);
             }
             else if (n?.Name == "Clint" && this.TryTakeItemsFromPlayer(ObjectIds.BustedLoader, 1, ObjectIds.DisguisedShoe, 1))
             {
@@ -121,7 +121,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             else if (n?.Name == "Clint" && this.State == LoaderQuestState.PickUpLoader)
             {
                 this.Spout(n, "Here's your front-end loader, all fixed up.  Stick to small rocks, right?#$b#If you need to move big ones, get some explosives for the job.  Oh, and let me know when you're doing it.  I'll bring beer.");
-                this.AddItemToInventory(ObjectIds.WorkingLoader);
+                this.AddQuestItemToInventory(ObjectIds.WorkingLoader);
             }
         }
 
@@ -138,6 +138,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             if (alreadyPlaced is null)
             {
                 var o = ItemRegistry.Create<StardewValley.Object>(ObjectIds.AlexesOldShoe);
+                o.questItem.Value = true;
                 o.Location = mines;
                 o.TileLocation = placeInMineForShoes;
                 this.LogInfo($"{ObjectIds.AlexesOldShoe} placed at {placeInMineForShoes.X},{placeInMineForShoes.Y}");
