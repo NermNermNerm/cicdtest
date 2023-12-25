@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using StardewValley;
 
@@ -7,6 +8,9 @@ namespace NermNermNerm.Stardew.QuestableTractor
     public class ScytheQuest
         : TractorPartQuest<ScytheQuestState>
     {
+        private const string crawfishItemId = "716";
+        private static readonly HashSet<string> shinyItems = new HashSet<string>() { "80" /* quartz */, "82" /* fire quartz */, "68" /* topaz */, "66" /* amethyst */, "60" /* Emerald */, "62" /* Aquamarine */, "70" /* jade */};
+
         internal ScytheQuest(ScytheQuestController controller)
             : base(controller)
         {
@@ -17,6 +21,13 @@ namespace NermNermNerm.Stardew.QuestableTractor
         public override void GotWorkingPart(Item workingPart)
         {
             this.State = this.State with { Progress = ScytheQuestStateProgress.InstallPart };
+        }
+
+        public override bool IsItemForThisQuest(Item item)
+        {
+            return base.IsItemForThisQuest(item)
+                || (this.State.VincentTradeKnown && item.ItemId == crawfishItemId)
+                || (this.State.JasTradeKnown && shinyItems.Contains(item.ItemId));
         }
 
         public override void CheckIfComplete(NPC n, Item? item)
@@ -89,7 +100,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             {
                 // It'd be nice if there was a way to make this a little more interactive with Jaz having, like a random taste-of-the-day and
                 //  only one gem will be shiny enough on that day.  I don't see a way to make that happen right now.
-                foreach (string shinyItemId in new string[] { "80" /* quartz */, "82" /* fire quartz */, "68" /* topaz */, "66" /* amethyst */, "60" /* Emerald */, "62" /* Aquamarine */, "70" /* jade */})
+                foreach (string shinyItemId in shinyItems)
                 {
                     var shinyThing = Game1.player.Items.FirstOrDefault(i => i?.ItemId == shinyItemId);
                     if (shinyThing is not null)

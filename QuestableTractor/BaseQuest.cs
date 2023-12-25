@@ -8,6 +8,15 @@ namespace NermNermNerm.Stardew.QuestableTractor
 {
     public abstract class BaseQuest : Quest, ISimpleLog
     {
+        // Putting this implementation here denies a few other usages, and it also means that our suppressions are
+        //  tied to the quest, and thus get tossed out every day.  I can't say if that's a bug or a feature right now.
+        private HashSet<string> oldNews = new HashSet<string>();
+
+        /// <summary>
+        ///   Hacky way to know if the call to <see cref="CheckIfComplete(NPC, Item?)"/> resulted in a call to <see cref="Spout"/>.
+        /// </summary>
+        private bool didNpcTalk;
+
         protected BaseQuest(BaseQuestController controller)
         {
             this.Controller = controller;
@@ -30,24 +39,25 @@ namespace NermNermNerm.Stardew.QuestableTractor
         /// </param>
         /// <returns>
         ///  <para>
-        ///   Documentation exists for NPC.tryToReceiveActiveObject, which says: Whether to return what the method would
-        ///   return if called normally, but without actually accepting the item or making any changes to the NPC. This
-        ///   is used to accurately predict whether the NPC would accept or react to the offer.
+        ///   Documentation exists for <paramref name="probe"/> in NPC.tryToReceiveActiveObject, which says, regardin the return:
+        ///   Whether to return what the method would return if called normally, but without actually accepting the item or making
+        ///   any changes to the NPC. This is used to accurately predict whether the NPC would accept or react to the offer.
         ///  </para>
         ///  <para>
-        ///   In Utility.checkForCharacterInteractionAtTile (which will call with probe=true), true seems to mean
-        ///   that the 'gift' cursor will be used if the player is holding something related to the quest.  But that
-        ///   seems odd because the object has to be giftable to even get to the point where it probes.
-        ///  </para>
-        ///  <para>
-        ///   The return value is ignored in several places.  All-up, I think it is meant to convey a "doneness",
-        ///   or with <paramref name="probe"/>, whether it's interesting.  For multi-stage quests like what's here,
-        ///   the return value could maybe be used to indicate stage-completion, but I don't believe there's ever
-        ///   a case in the code where the return value matters.
+        ///   In the case where <paramref name="probe"/> is false and there is a held <paramref name="item"/> and the item's
+        ///   isQuest property is true, a false return value will trigger a "Wrong person" error to show up in the HUD.
         ///  </para>
         /// </returns>
         public override sealed bool checkIfComplete(NPC n, int number1, int number2, Item item, string str, bool probe)
         {
+            // TODO: Right now, this makes it look like you could talk to any NPC about any of our quest items, when really
+            //   there's only a few people who are going to take an interest.  Perhaps it would be better if we made it so
+            //   that CheckIfComplete returns an Action?, which we run if probe is false.  Then we could unhack didNpcTalk too.
+            if (probe && n is not null && item is not null && this.IsItemForThisQuest(item))
+            {
+                return true;
+            }
+
             if (probe || n is null)
             {
                 return false;
@@ -58,8 +68,9 @@ namespace NermNermNerm.Stardew.QuestableTractor
                 return false;
             }
 
+            this.didNpcTalk = false;
             this.CheckIfComplete(n, item);
-            return false;
+            return this.didNpcTalk;
         }
 
         public abstract bool IsItemForThisQuest(Item item);
@@ -80,12 +91,10 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         protected abstract void SetObjective();
 
-        // Putting this implementation here denies a few other usages, and it also means that our suppressions are
-        //  tied to the quest, and thus get tossed out every day.  I can't say if that's a bug or a feature right now.
-        private HashSet<string> oldNews = new HashSet<string>();
-
         public void Spout(NPC n, string message)
         {
+            this.didNpcTalk = true;
+
             // This only impacts quest-based messages, and the 'oldNews' thing gets reset once per day.  Not sure if
             // the once-per-day thing is a bug or a feature.
             if (!this.oldNews.Add(n.Name + message))
