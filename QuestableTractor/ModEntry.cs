@@ -220,7 +220,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             {
                 e.Edit(editor =>
                 {
-                    WatererQuestController.EditToolAssets(editor.AsDictionary<string, ToolData>().Data);
+                    BorrowHarpoonQuestController.EditToolAssets(editor.AsDictionary<string, ToolData>().Data);
                 });
             }
             else if (e.NameWithoutLocale.StartsWith("Characters/Dialogue/"))

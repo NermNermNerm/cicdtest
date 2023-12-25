@@ -33,16 +33,24 @@ namespace NermNermNerm.Stardew.QuestableTractor
             Game1.player.holdUpItemThenMessage(brokenPart);
         }
 
-        protected sealed override void OnDayStartedQuestNotStarted()
+        protected override void OnStateChanged()
         {
-            this.MonitorInventoryForItem(this.BrokenAttachmentPartId, this.PlayerGotBrokenPart);
-            this.HideStarterItemIfNeeded();
-        }
-
-        protected sealed override void OnDayStartedQuestInProgress()
-        {
-            this.MonitorInventoryForItem(this.WorkingAttachmentPartId, this.PlayerGotWorkingPart);
-            base.OnDayStartedQuestInProgress();
+            if (this.OverallQuestState == OverallQuestState.NotStarted)
+            {
+                this.HideStarterItemIfNeeded();
+                this.MonitorInventoryForItem(this.BrokenAttachmentPartId, this.PlayerGotBrokenPart);
+                this.StopMonitoringInventoryFor(this.WorkingAttachmentPartId);
+            }
+            else if (this.OverallQuestState == OverallQuestState.InProgress)
+            {
+                this.StopMonitoringInventoryFor(this.BrokenAttachmentPartId);
+                this.MonitorInventoryForItem(this.WorkingAttachmentPartId, this.PlayerGotWorkingPart);
+            }
+            else
+            {
+                this.StopMonitoringInventoryFor(this.WorkingAttachmentPartId);
+                this.StopMonitoringInventoryFor(this.BrokenAttachmentPartId);
+            }
         }
 
         private void PlayerGotBrokenPart(Item brokenPart)
@@ -90,7 +98,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
 
             activeQuest.questComplete();
-            this.RawQuestState = QuestCompleteStateMagicWord;
             Game1.player.removeFirstOfThisItemFromInventory(this.WorkingAttachmentPartId);
             Game1.DrawDialogue(new Dialogue(null, null, this.QuestCompleteMessage));
             return true;

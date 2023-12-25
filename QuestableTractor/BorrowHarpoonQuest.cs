@@ -28,13 +28,13 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
         }
 
-        public override bool IsItemForThisQuest(Item item) => item.ItemId == WatererQuestController.HarpoonToolId;
+        public override bool IsItemForThisQuest(Item item) => item.ItemId == BorrowHarpoonQuestController.HarpoonToolId;
 
         public void LandedTheWaterer() => this.State = BorrowHarpoonQuestState.ReturnThePole;
 
         public override void CheckIfComplete(NPC n, Item? item)
         {
-            if (n.Name == "Willy" && this.State == BorrowHarpoonQuestState.ReturnThePole && this.TryTakeItemsFromPlayer(WatererQuestController.HarpoonToolId))
+            if (n.Name == "Willy" && this.State == BorrowHarpoonQuestState.ReturnThePole && this.TryTakeItemsFromPlayer(BorrowHarpoonQuestController.HarpoonToolId))
             {
                 this.Spout(n, "Ya reeled that ol water tank on wheels in, did ya laddy!$3#$b#Aye I do believe this'll be the talk of the Stardrop for many Fridays to come!$1");
                 Game1.player.changeFriendship(240, n);
@@ -45,12 +45,12 @@ namespace NermNermNerm.Stardew.QuestableTractor
             {
                 this.Spout(n, "Ah laddy...  I do think I know what you mighta hooked into and yer right that ya need a lot more pole than what you got.#$b#Here's a wee bit o' fishin' kit that my great great grandpappy used to land whales back before we knew better.#$b#I think ya will find it fit for tha purpose.");
 
-                Game1.player.addItemByMenuIfNecessary(ItemRegistry.Create(WatererQuestController.HarpoonToolId));
+                Game1.player.addItemByMenuIfNecessary(ItemRegistry.Create(BorrowHarpoonQuestController.HarpoonToolId));
                 this.State = BorrowHarpoonQuestState.CatchTheBigOne;
             }
             else if (n?.Name == "Willy" && this.State == BorrowHarpoonQuestState.GetThePole && Game1.player.currentLocation.Name != "FishShop")
             {
-                this.Spout(n, "Ah laddy...  I do think I know what you mighta hooked into and yer right that ya need a lot more pole than what you got.#$b#Come visit me in my shop and I'll show you something that might work");
+                this.Spout(n, "Ah laddy...  I do think I know what you mighta hooked into and yer right that ya need a lot more pole than what you got.#$b#Come visit me in my shop and I'll set you up with something that might work");
             }
         }
     }

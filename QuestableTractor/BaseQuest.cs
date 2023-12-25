@@ -166,6 +166,12 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         public virtual void WriteToLog(string message, StardewModdingAPI.LogLevel level, bool isOnceOnly)
             => this.Controller.WriteToLog(message, level, isOnceOnly);
+
+        public override void questComplete()
+        {
+            this.Controller.RawQuestState = BaseQuestController.QuestCompleteStateMagicWord;
+            base.questComplete();
+        }
     }
 
     public abstract class BaseQuest<TState> : BaseQuest

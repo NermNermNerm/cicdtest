@@ -25,7 +25,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             this.Mod = mod;
         }
 
-        protected const string QuestCompleteStateMagicWord = "Complete";
+        public const string QuestCompleteStateMagicWord = "Complete";
 
         public ModEntry Mod { get; }
 
@@ -52,19 +52,31 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         protected void MonitorInventoryForItem(string itemId, Action<Item> onItemAdded)
         {
-            this.itemsToWatch[itemId] = onItemAdded;
             if (!this.isWatchingInventory)
             {
+                this.LogTrace($"{this.GetType().Name} Started monitoring inventory changes");
                 this.Mod.Helper.Events.Player.InventoryChanged += this.Player_InventoryChanged;
                 this.isWatchingInventory = true;
             }
+
+            if (!this.itemsToWatch.ContainsKey(itemId))
+            {
+                this.LogTrace($"{this.GetType().Name} Started monitoring inventory for {itemId}");
+            }
+
+            this.itemsToWatch[itemId] = onItemAdded;
         }
 
         protected void StopMonitoringInventoryFor(string itemId)
         {
-            this.itemsToWatch.Remove(itemId);
+            if (this.itemsToWatch.Remove(itemId))
+            {
+                this.LogTrace($"{this.GetType().Name} Stopped monitoring inventory for {itemId}");
+            }
+
             if (!this.itemsToWatch.Any() && this.isWatchingInventory)
             {
+                this.LogTrace($"{this.GetType().Name} Stopped monitoring inventory changes");
                 this.Mod.Helper.Events.Player.InventoryChanged -= this.Player_InventoryChanged;
                 this.isWatchingInventory = false;
             }
@@ -103,16 +115,29 @@ namespace NermNermNerm.Stardew.QuestableTractor
                     throw new NotImplementedException("QuestableTractorMod quests should only be playable by the main player");
                 }
 
+                bool wasChanged;
                 if (value is null)
                 {
-                    Game1.player.modData.Remove(this.ModDataKey);
+                    wasChanged = Game1.player.modData.Remove(this.ModDataKey);
                 }
                 else
                 {
+                    Game1.player.modData.TryGetValue(this.ModDataKey, out string? oldValue);
                     Game1.player.modData[this.ModDataKey] = value;
+                    wasChanged = (value != oldValue);
+                }
+
+                if (wasChanged)
+                {
+                    this.OnStateChanged();
                 }
             }
         }
+
+        /// <summary>
+        ///  This method is called when the state changes and also when the game is loaded.
+        /// </summary>
+        protected virtual void OnStateChanged() { }
 
         public OverallQuestState OverallQuestState =>
             this.RawQuestState switch
@@ -153,24 +178,34 @@ namespace NermNermNerm.Stardew.QuestableTractor
             var quest = this.CreateQuest();
             quest.SetDisplayAsNew();
             Game1.player.questLog.Add(quest);
-            this.MonitorQuestItems();
         }
 
         public BaseQuest? GetQuest() => Game1.player.questLog.OfType<BaseQuest>().FirstOrDefault(bc => bc.Controller == this);
 
-        protected virtual void OnDayStartedQuestNotStarted()
-        {
-            // implementations should hide the quest starter
-        }
+        /// <summary>
+        ///   Called once at the start of every day when the quest is not started.
+        /// </summary>
+        /// <remarks>
+        ///   Implementations should ensure that the triggers necessary to start the quest are present.
+        /// </remarks>
+        protected virtual void OnDayStartedQuestNotStarted() { }
 
-        protected abstract void OnDayStartedQuestInProgress();
-
-        protected virtual void OnDayStartedQuestComplete()
-        {
-        }
+        /// <summary>
+        ///   Called once at the start of every day when the quest is in progress.
+        /// </summary>
+        /// <remarks>
+        ///   Implementations should use this to ensure that items are placed correctly and do any
+        ///   day-over-day quest advancements.
+        /// </remarks>
+        protected virtual void OnDayStartedQuestInProgress() { }
 
         public void OnDayStarted()
         {
+            // The promise is that we call this when the state changes and on initial load...  But right now
+            // we haven't hooked into that event and, in any case, OnStateChange shouldn't suffer from being
+            // called more frequently than needed, so here it is.
+            this.OnStateChanged();
+
             switch (this.OverallQuestState)
             {
                 case OverallQuestState.NotStarted:
@@ -178,21 +213,20 @@ namespace NermNermNerm.Stardew.QuestableTractor
                     break;
                 case OverallQuestState.InProgress:
                     this.OnDayStartedQuestInProgress();
-                    var newQuest = this.CreateQuest();
-                    newQuest.MarkAsViewed();
-                    Game1.player.questLog.Add(newQuest);
-                    this.MonitorQuestItems();
                     break;
                 case OverallQuestState.Completed:
-                    this.OnDayStartedQuestComplete();
+                    // We don't have any quests that could use an on-complete event...
                     break;
             }
-        }
 
-        /// <summary>
-        ///  Called once a day when the quest is active to ensure that we're monitoring for items even after reload
-        /// </summary>
-        protected virtual void MonitorQuestItems() { }
+            // Re-test the state beause it might have completed overnight
+            if (this.OverallQuestState == OverallQuestState.InProgress)
+            {
+                var newQuest = this.CreateQuest();
+                newQuest.MarkAsViewed();
+                Game1.player.questLog.Add(newQuest);
+            }
+        }
 
         public void OnDayEnding()
         {

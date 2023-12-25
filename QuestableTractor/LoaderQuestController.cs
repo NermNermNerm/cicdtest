@@ -49,15 +49,22 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
         }
 
-        protected override void MonitorQuestItems()
+        protected override void OnStateChanged()
         {
-            this.MonitorInventoryForItem(ObjectIds.AlexesOldShoe, this.OnPlayerGotOldShoes);
-            this.MonitorInventoryForItem(ObjectIds.DisguisedShoe, this.OnPlayerGotDisguisedShoes);
+            if (this.OverallQuestState == OverallQuestState.InProgress && this.State >= LoaderQuestState.FindSomeShoes && this.State < LoaderQuestState.GiveShoesToClint)
+            {
+                this.MonitorInventoryForItem(ObjectIds.AlexesOldShoe, this.OnPlayerGotOldShoes);
+                this.MonitorInventoryForItem(ObjectIds.DisguisedShoe, this.OnPlayerGotDisguisedShoes);
+            }
+            else
+            {
+                this.StopMonitoringInventoryFor(ObjectIds.AlexesOldShoe);
+                this.StopMonitoringInventoryFor(ObjectIds.DisguisedShoe);
+            }
         }
 
         private void OnPlayerGotOldShoes(Item oldShoes)
         {
-            this.StopMonitoringInventoryFor(ObjectIds.AlexesOldShoe);
             var quest = Game1.player.questLog.OfType<LoaderQuest>().FirstOrDefault();
             if (quest is null)
             {
