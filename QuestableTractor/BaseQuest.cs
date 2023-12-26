@@ -93,14 +93,14 @@ namespace NermNermNerm.Stardew.QuestableTractor
 
         public void Spout(NPC n, string message)
         {
-            this.didNpcTalk = true;
-
             // This only impacts quest-based messages, and the 'oldNews' thing gets reset once per day.  Not sure if
             // the once-per-day thing is a bug or a feature.
             if (!this.oldNews.Add(n.Name + message))
             {
                 return;
             }
+
+            this.didNpcTalk = true;
 
             // Conversation keys and location specific dialogs take priority.  We can't fix the location-specific
             // stuff, but we can nix conversation topics.

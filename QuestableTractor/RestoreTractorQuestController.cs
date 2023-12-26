@@ -66,6 +66,25 @@ namespace NermNermNerm.Stardew.QuestableTractor
             return newState;
         }
 
+        protected override void OnStateChanged()
+        {
+            // Doing these invalidations here rather than when the state is set is kindof roundabout,
+            // but at least in the case of AdvanceStateForDayPassing, that doesn't work because when
+            // you invalidate the cache state of buildings, it immediately reloads them, and thus the
+            // state that we have hasn't actually propogated to out to the persistent state yet,
+            // so we read the wrong value.
+            switch (this.State)
+            {
+                case RestorationState.BuildTractorGarage:
+                    this.Mod.TractorModConfig.TractorGarageBuildingCostChanged();
+                    break;
+                case RestorationState.WaitingForSebastianDay1:
+                    this.Mod.TractorModConfig.TractorGarageBuildingCostChanged();
+                    break;
+
+            }
+        }
+
         protected override BaseQuest CreateQuest() => new RestoreTractorQuest(this);
 
         protected override void OnDayStartedQuestNotStarted()

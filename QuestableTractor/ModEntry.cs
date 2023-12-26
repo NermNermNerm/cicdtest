@@ -8,6 +8,7 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Buildings;
+using StardewValley.GameData.Buildings;
 using StardewValley.GameData.GarbageCans;
 using StardewValley.GameData.Objects;
 using StardewValley.GameData.Tools;
@@ -175,6 +176,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
         }
 
+        [EventPriority(EventPriority.Low)] // Causes us to come after TractorMod's, which does not set EventPriority
         internal void OnAssetRequested(object? _, AssetRequestedEventArgs e)
         {
             // this.Monitor.Log($"OnAssetRequested({e.NameWithoutLocale.Name})");
@@ -190,7 +192,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             {
                 e.Edit(editor =>
                 {
-                    this.TractorModConfig.EditBuildings(editor);
+                    this.TractorModConfig.EditBuildings(editor.AsDictionary<string, BuildingData>().Data);
                 });
             }
             else if (e.NameWithoutLocale.IsEquivalentTo("Data/Objects"))
@@ -202,7 +204,7 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
             else if (e.NameWithoutLocale.IsEquivalentTo("Data/CraftingRecipes"))
             {
-                // TODO: Can we make this recipe only available when its quest is running?
+                // TODO: Make this recipe only available when its quest is running?
                 e.Edit(editor =>
                 {
                     IDictionary<string, string> recipes = editor.AsDictionary<string, string>().Data;

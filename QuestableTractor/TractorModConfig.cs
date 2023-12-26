@@ -1,9 +1,6 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Buildings;
@@ -15,7 +12,6 @@ namespace NermNermNerm.Stardew.QuestableTractor
     internal class TractorModConfig
     {
         private readonly ModEntry mod;
-        private bool isBuildingAvailable = true; // <-- again, this is what tractor mod enables from day 1
 
         public const string GarageBuildingId = "Pathoschild.TractorMod_Stable";
         public const string TractorModId = "Pathoschild.TractorMod";
@@ -25,17 +21,10 @@ namespace NermNermNerm.Stardew.QuestableTractor
             this.mod = mod;
         }
 
-        public bool IsGarageBuildingAvailable
+        public void TractorGarageBuildingCostChanged()
         {
-            get => this.isBuildingAvailable;
-            set
-            {
-                if (value != this.isBuildingAvailable)
-                {
-                    this.isBuildingAvailable = value;
-                    this.mod.Helper.GameContent.InvalidateCache("Data/Buildings");
-                }
-            }
+            this.mod.Helper.GameContent.InvalidateCache("Data/Buildings");
+            this.mod.LogTrace("Invalidating Data/Buildings");
         }
 
         public void SetConfig(bool isHoeUnlocked, bool isLoaderUnlocked, bool isHarvesterUnlocked, bool isWatererUnlocked, bool isSpreaderUnlocked)
@@ -55,6 +44,8 @@ namespace NermNermNerm.Stardew.QuestableTractor
             this.SetupTool("Slingshot", false, "");
             this.SetupTool("WateringCan", isWatererUnlocked, "Enable");
             this.SetupTool("SeedBagMod", isSpreaderUnlocked, "Enable");
+
+            this.TractorGarageBuildingCostChanged();
         }
 
         private void SetupTool(string toolName, bool isEnabled, string enabledModes)
@@ -94,11 +85,30 @@ namespace NermNermNerm.Stardew.QuestableTractor
             }
         }
 
-        internal void EditBuildings(IAssetData editor)
+        internal void EditBuildings(IDictionary<string, BuildingData> buildingData)
         {
-            if (editor.AsDictionary<string, BuildingData>().Data.TryGetValue(GarageBuildingId, out BuildingData? value))
+            if (Game1.MasterPlayer is null || !Context.IsMainPlayer)
             {
-                // TODO: change these costs after the first build.  Not sure why anybody would want to build a second garage tho.  Multiplayer?
+                this.mod.LogTrace("Skipping building updates -- we were asked for it before the game was loaded or we're multiplayer.");
+                // Leave it alone if we're being called before on game start.
+                return;
+            }
+
+            if (!buildingData.TryGetValue(GarageBuildingId, out BuildingData? value))
+            {
+                this.mod.LogError($"It looks like TractorMod is not loaded - {GarageBuildingId} does not exist");
+                return;
+            }
+
+            if (!this.mod.RestoreTractorQuestController.IsStarted
+                || (!this.mod.RestoreTractorQuestController.IsComplete && this.mod.RestoreTractorQuestController.State < RestorationState.BuildTractorGarage))
+            {
+                this.mod.LogTrace("Disabled the ability to buy a tractor garage at Robin's.");
+                value.Builder = null;
+            }
+            else if (!this.mod.RestoreTractorQuestController.IsComplete && this.mod.RestoreTractorQuestController.State < RestorationState.WaitingForSebastianDay1)
+            {
+                this.mod.LogTrace("Discounted garage price at Robin's.");
                 value.BuildCost = 350;
                 value.BuildMaterials = new List<BuildingMaterial>
                 {
@@ -106,11 +116,11 @@ namespace NermNermNerm.Stardew.QuestableTractor
                     new BuildingMaterial() { ItemId = "(O)390", Amount = 200 }, // Stone
                     new BuildingMaterial() { ItemId = "(O)395", Amount = 1 }, // 1 cup of coffee
                 };
-                value.Builder = (this.isBuildingAvailable ? "Robin" : null);
             }
             else
             {
-                this.mod.LogError($"It looks like TractorMod is not loaded - {GarageBuildingId} does not exist");
+                // Normal cost after first build
+                this.mod.LogTrace("Reverted the tractor garage price to normal at Robin's.");
             }
         }
     }
