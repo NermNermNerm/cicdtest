@@ -9,6 +9,9 @@ using StardewValley.GameData.Buildings;
 
 namespace NermNermNerm.Stardew.QuestableTractor
 {
+    /// <summary>
+    ///   This class manages the relationship between this mod and PathosChild.TractorMod.
+    /// </summary>
     internal class TractorModConfig
     {
         private readonly ModEntry mod;
@@ -38,11 +41,11 @@ namespace NermNermNerm.Stardew.QuestableTractor
             this.SetupTool("MeleeDagger", false, "");
             this.SetupTool("MeleeSword", false, "");
             this.SetupTool("PickAxe", isLoaderUnlocked, "ClearDebris,ClearDirt,ClearWeeds");
-            this.SetupTool("Scythe", isHarvesterUnlocked, "HarvestCrops,HarvestFlowers,HarvestGrass,HarvestForage,ClearDeadCrops,ClearWeeds");
+            this.SetupTool("Scythe", isHarvesterUnlocked, "HarvestCrops,HarvestFlowers,HarvestGrass,HarvestForage,ClearDeadCrops,ClearWeeds,IncreaseDistance");
             this.SetupTool("Seeds", isSpreaderUnlocked, "Enable");
             this.SetupTool("Shears", false, "");
             this.SetupTool("Slingshot", false, "");
-            this.SetupTool("WateringCan", isWatererUnlocked, "Enable");
+            this.SetupTool("WateringCan", isWatererUnlocked, "Enable,IncreaseDistance");
             this.SetupTool("SeedBagMod", isSpreaderUnlocked, "Enable");
 
             this.TractorGarageBuildingCostChanged();

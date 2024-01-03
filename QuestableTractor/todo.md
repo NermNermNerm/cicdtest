@@ -1,9 +1,11 @@
 ﻿
 * Make the scythe crafting recipe disappear after the quest closes
-* Tractor Garage is always available for building at low cost.  Should not be there at start and go back to default after first one built.
-* Quest items are destructible
 * Harpoon casting graphics are broken
 * It'd be nice if we could get Sebastian working under the tractor
+* Add conversation topics for NPC's after hearts are gained -
+ - Wizard cops to not needing to run around
+ - Dwarf talks about shoes
+ - Sebastian thanks for doing something for the community
 * In multiplayer, it'll probably take a game reload for other players to get new tractor capabilities.
 
 
@@ -21,6 +23,8 @@ Done
 * Spreader name is messed up
 * Didn't get quest when spreader arrived
 * Install new assets
+* Tractor Garage is always available for building at low cost.  Should not be there at start and go back to default after first one built.
+* Quest items are destructible
 
 TractorMod
 * Make the radius configurable per-tool
