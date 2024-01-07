@@ -7,7 +7,7 @@
     "UniqueID": "NermNermNerm.QuestableTractor",
     "Description": "Lets you get the tractor early, but only after some quests are done",
     "EntryDll": "QuestableTractor.dll",
-    "UpdateKeys": [ ],
+    "UpdateKeys": [ "GitHub:NermNermNerm/cicdtest" ],
     "Dependencies": [
         {
             "UniqueID": "Pathoschild.TractorMod",
